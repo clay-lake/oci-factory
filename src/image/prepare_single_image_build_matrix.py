@@ -6,6 +6,7 @@ import json
 import os
 import pydantic
 import yaml
+from pathlib import Path
 
 from utils.schema.triggers import ImageSchema
 
@@ -83,8 +84,14 @@ if __name__ == "__main__":
             builds[img_number]["track"] = track
             builds[img_number]["base"] = f"ubuntu:{base_release}"
 
+        revision_data_dir = Path(args.revision_data_dir)
+
+        if not revision_data_dir.exists():
+            print(f"Creating revision data directory {revision_data_dir}")
+            revision_data_dir.mkdir(parents=True)
+
         with open(
-            f"{args.revision_data_dir}/{builds[img_number]['revision']}",
+            f"{revision_data_dir}/{builds[img_number]['revision']}",
             "w",
             encoding="UTF-8"
         ) as data_file:
