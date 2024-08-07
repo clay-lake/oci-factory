@@ -41,7 +41,6 @@ jobs:
           echo "${{steps.changed-files.outputs.all_changed_files }}" |\
           sed -Ee 's/(\S+)/\"\1\"/g' -e "s/^/::set-output name=matrix::[/" -e "s/$/]/" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
-          jq
 
   run-build:
     uses: ./.github/workflows/Image.yaml
