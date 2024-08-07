@@ -1,0 +1,56 @@
+name: Trigger Image
+run-name: 'Calling Image Workflow on ${{ github.event_name }}'
+
+
+# TODO: make the pattern oci/*/image.y*ml more DRY
+on:
+  push:
+    paths:
+      - "oci/*/image.y*ml"
+      - "!oci/mock*"
+  pull_request:
+    paths:
+      - "oci/*/image.y*ml"
+      - "!oci/mock*"
+
+
+jobs:
+  find-changes:
+    runs-on: ubuntu-22.04
+    name: Prepare build
+    outputs:
+      changed-paths: ${{ steps.changed-files-json.outputs.matrix }}
+    steps:
+
+      - uses: actions/checkout@v4
+
+      # determine number of builds to trigger by scanning repo
+      - name: Collect changed image YAML files
+        uses: tj-actions/changed-files@v35
+        id: changed-files
+        with:
+          dir_names: "true"
+          files: |
+            oci/*/image.y*ml
+
+      - name: Convert collection to JSON
+        id: changed-files-json
+
+        # TODO: this needs to be improved, create a json-output formatter
+        run: |
+          echo "${{steps.changed-files.outputs.all_changed_files }}" |\
+          sed -Ee 's/(\S+)/\"\1\"/g' -e "s/^/::set-output name=matrix::[/" -e "s/$/]/" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+          jq
+
+  run-build:
+    uses: ./.github/workflows/Image.yaml
+    needs: [find-changes]
+    strategy:
+      fail-fast: true # TODO: Does this need to be fail-fast=
+      matrix: 
+        changed-paths: ${{ fromJSON(needs.find-changes.outputs.changed-paths) }}
+    with:
+      oci-path: "${{ matrix.changed-paths }}"
+    secrets: inherit
+
