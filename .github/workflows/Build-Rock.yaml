@@ -1,7 +1,7 @@
 name: Build Rock
 
 # TODO:
-# - does each build need to be aware of the rock name?
+# - does each build need oci-archive-name?
 
 on:
   workflow_call:
@@ -27,9 +27,10 @@ on:
 env:
   ROCK_REPO_DIR: rock-repo # path where the image repo is cloned to
   ROCKS_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
+  SELF_REPO: clay-lake/oci-factory
 
 jobs:
-  configure-build: #
+  configure-build:
     runs-on: ubuntu-22.04
     outputs:
       runner-build-matrix: ${{ steps.configure.outputs.runner-build-matrix }} 
@@ -38,6 +39,8 @@ jobs:
 
       # setup
       - uses: actions/checkout@v4
+        with:
+          repo: ${{ env.SELF_REPO }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
@@ -109,8 +112,13 @@ jobs:
         runs-on: ubuntu-22.04
         name: 'LPCI Build ${{ inputs.rock-repo }} | ${{ inputs.rockfile-directory }} | ${{ matrix.architecture }} '
         steps:
+
+          # TODO: assert that credentials should be present if this job is executed
     
           # setup
+          - uses: actions/checkout@v4
+            with:
+              repo: ${{ env.SELF_REPO }}
           - uses: actions/setup-python@v5
             with:
               python-version: "3.x"
