@@ -1,5 +1,8 @@
 name: Build Rock
 
+# TODO:
+# - does each build need to be aware of the rock name?
+
 on:
   workflow_call:
     inputs:
@@ -14,188 +17,146 @@ on:
       rock-repo-commit:
         description: "Git ref from where to build the rock from"
         type: string
-        default: HEAD
-        required: false
+        required: true
       rockfile-directory:
         description: "Directory, in 'rock-repo', where to find the rockcraft.yaml file"
         type: string
         required: true
 
+
 env:
-  # TODO: establish build directory?
-  ROCK_REPO_DIR: rock-repo
-  ROCKS_CI_FOLDER: ci-rocks
+  ROCK_REPO_DIR: rock-repo # path where the image repo is cloned to
+  ROCKS_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
 
 jobs:
-  prepare-multi-arch-matrix:
+  configure-build: #
     runs-on: ubuntu-22.04
     outputs:
-      build-for: ${{ steps.rock-platforms.outputs.build-for }} # TODO: refactor as platforms
-      build-with-lpci: ${{ steps.rock-platforms.outputs.build-with-lpci }}
-      rock-name: ${{ steps.get-rock-name.outputs.rock-name }}
+      runner-build-matrix: ${{ steps.configure.outputs.runner-build-matrix }} 
+      lpci-build-matrix: ${{ steps.configure.outputs.lpci-build-matrix }} 
     steps:
 
       # setup
       - uses: actions/checkout@v4
-      - uses: mikefarah/yq@v4.44.3
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: pip install -r src/build-rock/requirements.txt
 
 
-      - name: Get rock-name
-        id: get-rock-name
-        run: echo "rock-name=$(yq '.name' "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/rockcraft.yaml")"  >> $GITHUB_OUTPUT
-
-      - name: DELETE ME
-        run: |
-          echo oci-archive-name ${{ inputs.oci-archive-name }}
-          echo rock-repo-commit ${{ inputs.rock-repo-commit }}
-          echo rock-repo ${{ inputs.rock-repo }}
-
-
-      #   TODO fix this path to infer github.com if no protocol or domain is given
-      # fails because we are developing this locally without a token
-      # - name: Clone GitHub image repository
-      #   uses: actions/checkout@v4
-      #   id: clone-image-repo
-      #   continue-on-error: true
-      #   with:
-      #     repository: https://github.com/${{ inputs.rock-repo }}.git
-      #     ref: ${{ inputs.rock-repo-commit }}
-      #     fetch-depth: 1
-      #     submodules: 'recursive' # TODO: review if this is an improvement
-      #     path: ${{ env.ROCK_REPO_DIR }}
-
-
         # TODO add support here for token, ref, recursive clone and shallow clone
-      - name: Clone GitHub image repository
-        id: clone-image-repo
+      - name: Clone Repo
+        id: clone-repo
         run: |
           git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }} 
 
 
-
-      # - name: DELETE ME
-      #   run: |
-      #     ls -R
-      #     cat src/build-rock/requirements.txt
-
-      - name: Get rock archs
-        id: rock-platforms
+      - name: Configure
+        id: configure
         run: |
           ./src/build-rock/generate_matrix.py \
           --rockfile-directory ${{ inputs.rockfile-directory }}
 
-  build:
-    needs: [prepare-multi-arch-matrix]
+  runner-build:
+    needs: [configure-build]
     strategy:
       fail-fast: true
-      matrix: ${{ fromJSON(needs.prepare-multi-arch-matrix.outputs.build-for) }}
-    runs-on: ${{ matrix.runner }} # TODO: restore before release
-    name: 'Build ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }} | ${{ matrix.architecture }} '
+      matrix: ${{ fromJSON(needs.configure-build.outputs.runner-build-matrix) }}
+    runs-on: ${{ matrix.runner }} 
+    name: 'Runner Build ${{ inputs.rock-repo }} | ${{ inputs.rockfile-directory }} | ${{ matrix.architecture }} '
     steps:
-  #     - name: Clone GitHub image repository
-  #       uses: actions/checkout@v4
-  #       id: clone-image-repo
-  #       continue-on-error: true
-  #       with:
-  #         repository: ${{ inputs.rock-repo }}
-  #         fetch-depth: 0
-  #     - name: Clone generic image repository
-  #       if: ${{ steps.clone-image-repo.outcome == 'failure' }}
-  #       run: |
-  #         git clone ${{ inputs.rock-repo }} .
-  #     - run: git checkout ${{ inputs.rock-repo-commit }}
 
-
-      - name: Clone GitHub image repository
-        id: clone-image-repo
+      - name: Clone Repo
+        id: clone-repo
         run: |
           git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
 
 
-      # TODO: enable before deployment
-      - name: Build rock ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }}
+      - name: Build
         id: rockcraft
-        if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 0
         uses: canonical/craft-actions/rockcraft-pack@main
         with:
           path: "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
           verbosity: debug
 
 
-      # - uses: actions/setup-python@v5
-      #   if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
-      #   with:
-      #     python-version: '3.x'
-
-      # - uses: nick-fields/retry@v3.0.0
-      #   name: Build multi-arch ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }} in Launchpad
-      #   if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
-      #   with:
-      #     timeout_minutes: 180
-      #     max_attempts: 4
-      #     polling_interval_seconds: 5
-      #     retry_wait_seconds: 30
-      #     command: |
-      #       set -ex
-      #       cd ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}
-      #       rocks_toolbox="$(mktemp -d)"
-      #       git clone --depth 1 --branch v1.1.2 https://github.com/canonical/rocks-toolbox $rocks_toolbox
-      #       ${rocks_toolbox}/rockcraft_lpci_build/requirements.sh
-      #       pip3 install -r ${rocks_toolbox}/rockcraft_lpci_build/requirements.txt
-
-      #       python3 ${rocks_toolbox}/rockcraft_lpci_build/rockcraft_lpci_build.py \
-      #         --lp-credentials-b64 "${{ secrets.LP_CREDENTIALS_B64 }}" \
-      #         --launchpad-accept-public-upload
-
-
-      - name: Rename rock OCI archive
-        id: rock
+      - name: Collect Artifacts
+        id: collect-artifacts
         run: |
-          mkdir ${{ env.ROCKS_CI_FOLDER }}
-          if [ ${{ needs.prepare-multi-arch-matrix.outputs.build-with-lpci }} -eq 0 ]
-          then
-            cp ${{ steps.rockcraft.outputs.rock }} ${{ env.ROCKS_CI_FOLDER }}/$(basename ${{ steps.rockcraft.outputs.rock }})
-            echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
-          else
-            cp ${{ inputs.rockfile-directory }}/*.rock ${{ env.ROCKS_CI_FOLDER }}
-            echo "filename=${{ needs.prepare-multi-arch-matrix.outputs.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
-          fi
-      - name: Upload ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }} for ${{ matrix.architecture }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.oci-archive-name }}-${{ steps.rock.outputs.filename }}
-          path: ${{ env.ROCKS_CI_FOLDER }}
-          if-no-files-found: error
+              mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
+              echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
 
-  assemble-rock:
-    needs: [prepare-multi-arch-matrix, build]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/download-artifact@v4
-        id: download
-      - run: sudo apt update && sudo apt install buildah -y
-      - name: Merge single-arch rocks into multi-arch OCI archive
-        run: |
-          set -xe
-          ls ./${{ inputs.oci-archive-name }}*
-          buildah manifest create multi-arch-rock
-          for rock in `find ${{ inputs.oci-archive-name }}*/*.rock`
-          do
-            test -f $rock
-            buildah manifest add multi-arch-rock oci-archive:$rock
-          done
-          buildah manifest push --all multi-arch-rock oci-archive:${{ inputs.oci-archive-name }}
-      - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.oci-archive-name }}
-          path: ${{ inputs.oci-archive-name }}
-          if-no-files-found: error
-      - uses: actions/cache/save@v4
-        with:
-          path: ${{ inputs.oci-archive-name }}
-          key: ${{ github.run_id }}-${{ inputs.oci-archive-name }}
+  lpci-build:
+        needs: [configure-build]
+        strategy:
+          fail-fast: true
+          matrix: ${{ fromJSON(needs.configure-build.outputs.lpci-build-matrix) }}
+        runs-on: ubuntu-22.04
+        name: 'LPCI Build ${{ inputs.rock-repo }} | ${{ inputs.rockfile-directory }} | ${{ matrix.architecture }} '
+        steps:
+    
+          # setup
+          - uses: actions/setup-python@v5
+            with:
+              python-version: "3.x"
+          - run: pip install -r src/build-rock/requirements.txt
+          
+    
+          - name: Clone GitHub image repository
+            id: clone-repo
+            run: |
+              git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
+    
+
+          - name: Build
+            uses: nick-fields/retry@v3.0.0
+            with:
+              timeout_minutes: 180
+              max_attempts: 4
+              polling_interval_seconds: 5
+              retry_wait_seconds: 30
+              command: src/build-rock/lpci_build.sh
+
+                  
+          - name: Collect Artifacts
+            id: collect-artifacts
+            run: |
+                mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/*.rock "$_"
+                echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
+
+
+          - name: Upload ${{ matrix.rock-name }} for ${{ matrix.architecture }}
+            uses: actions/upload-artifact@v4
+            with:
+              name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
+              path: ${{ env.ROCKS_CI_FOLDER }}
+              if-no-files-found: error
+
+  # assemble-rock:
+  #   needs: [configure-build, build]
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       id: download
+  #     - run: sudo apt update && sudo apt install buildah -y
+  #     - name: Merge single-arch rocks into multi-arch OCI archive
+  #       run: |
+  #         set -xe
+  #         ls ./${{ inputs.oci-archive-name }}*
+  #         buildah manifest create multi-arch-rock
+  #         for rock in `find ${{ inputs.oci-archive-name }}*/*.rock`
+  #         do
+  #           test -f $rock
+  #           buildah manifest add multi-arch-rock oci-archive:$rock
+  #         done
+  #         buildah manifest push --all multi-arch-rock oci-archive:${{ inputs.oci-archive-name }}
+  #     - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ${{ inputs.oci-archive-name }}
+  #         path: ${{ inputs.oci-archive-name }}
+  #         if-no-files-found: error
+  #     - uses: actions/cache/save@v4
+  #       with:
+  #         path: ${{ inputs.oci-archive-name }}
+  #         key: ${{ github.run_id }}-${{ inputs.oci-archive-name }}
