@@ -29,7 +29,6 @@ jobs:
     uses: ./.github/workflows/Build-Rock.yaml
     with:
       oci-archive-name: "mock-rock_1.1.rock"
-      rock-name: mock-rock
       rock-repo: canonical/oci-factory
       rock-repo-commit: 7f080b50ba656538aee3819889090c173f06debd
       rockfile-directory: examples/mock-rock/1.1/

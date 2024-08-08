@@ -7,10 +7,6 @@ on:
         description: "Final filename of the rock's OCI archive"
         type: string
         required: true
-      # rock-name:
-      #   description: "Name of the rock"
-      #   type: string
-      #   required: true
       rock-repo:
         description: "Public Git repo where to build the rock from"
         type: string
