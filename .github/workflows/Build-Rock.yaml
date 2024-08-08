@@ -1,4 +1,4 @@
-name: Build rock
+name: Build Rock
 
 on:
   workflow_call:
@@ -29,104 +29,117 @@ on:
         required: true
 
 env:
+  # TODO: establish build directory?
+  ROCK_REPO_DIR: rock-repo
   ROCKS_CI_FOLDER: ci-rocks
 
 jobs:
   prepare-multi-arch-matrix:
     runs-on: ubuntu-22.04
     outputs:
-      build-for: ${{ steps.rock-platforms.outputs.build-for }}
+      build-for: ${{ steps.rock-platforms.outputs.build-for }} # TODO: refactor as platforms
       build-with-lpci: ${{ steps.rock-platforms.outputs.build-with-lpci }}
     steps:
-      - name: Clone GitHub image repository
-        uses: actions/checkout@v4
-        id: clone-image-repo
-        continue-on-error: true
-        with:
-          repository: ${{ inputs.rock-repo }}
-          fetch-depth: 0
-      - name: Clone generic image repository
-        if: ${{ steps.clone-image-repo.outcome == 'failure' }}
-        run: |
-          git clone ${{ inputs.rock-repo }} .
-      - run: git checkout ${{ inputs.rock-repo-commit }}
-      - run: sudo snap install yq --channel=v4/stable
-      - name: Validate image naming and base
-        working-directory: ${{ inputs.rockfile-directory }}
-        run: |
-          rock_name=`cat rockcraft.y*ml | yq -r .name`
-          if [[ "${{ inputs.oci-factory-path }}" != *"${rock_name}"* ]]
-          then
-            echo "ERROR: the rock's name '${rock_name}' must match the OCI folder name!"
-            exit 1
-          fi
+
+      # setup
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - run: pip install pyyaml
+          python-version: "3.x"
+      - run: pip install -r src/build-rock/requirements.txt
+
+      - name: DELETE ME
+        run: |
+          echo oci-archive-name ${{ inputs.oci-archive-name }}
+          echo oci-factory-path ${{ inputs.oci-factory-path }}
+          echo rock-name ${{ inputs.rock-name }}
+          echo rock-repo-commit ${{ inputs.rock-repo-commit }}
+          echo rock-repo ${{ inputs.rock-repo }}
+
+
+      #   TODO fix this path to infer github.com if no protocol or domain is given
+      # fails because we are developing this locally without a token
+      # - name: Clone GitHub image repository
+      #   uses: actions/checkout@v4
+      #   id: clone-image-repo
+      #   continue-on-error: true
+      #   with:
+      #     repository: https://github.com/${{ inputs.rock-repo }}.git
+      #     ref: ${{ inputs.rock-repo-commit }}
+      #     fetch-depth: 1
+      #     submodules: 'recursive' # TODO: review if this is an improvement
+      #     path: ${{ env.ROCK_REPO_DIR }}
+
+
+        # TODO add support here for token, ref, recursive clone and shallow clone
+      - name: Clone GitHub image repository
+        id: clone-image-repo
+        run: |
+          git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
+
+
+
+      # - name: DELETE ME
+      #   run: |
+      #     ls -R
+      #     cat src/build-rock/requirements.txt
+
+
+                    
+
+
+
+      # TODO: Move validation to matrix generation stage
+      # - name: Validate image naming and base
+          # uses: mikefarah/yq@v4.44.3
+      #   working-directory: ${{ inputs.rockfile-directory }}
+      #   run: |
+      #     rock_name=`cat rockcraft.y*ml | yq -r .name`
+      #     if [[ "${{ inputs.oci-factory-path }}" != *"${rock_name}"* ]]
+      #     then
+      #       echo "ERROR: the rock's name '${rock_name}' must match the OCI folder name!"
+      #       exit 1
+      #     fi
+
+
+
+
       - name: Get rock archs
-        uses: jannekem/run-python-script-action@v1
         id: rock-platforms
-        with:
-          script: |
-            import yaml
-            import os
-
-            BUILD_WITH_LPCI = 0
-
-            with open("${{ inputs.rockfile-directory }}/rockcraft.yaml") as rf:
-              rockcraft_yaml = yaml.safe_load(rf)
-
-            platforms = rockcraft_yaml["platforms"]
-
-            target_archs = []
-            for platf, values in platforms.items():
-                if isinstance(values, dict) and "build-for" in values:
-                    target_archs += list(values["build-for"])
-                    continue
-                target_archs.append(platf)
-
-            print(f"Target architectures: {set(target_archs)}")
-
-            matrix = {"include": []}
-            gh_supported_archs = {"amd64": "ubuntu-22.04", "arm64": "Ubuntu_ARM64_4C_16G_01"}
-            if set(target_archs) - set(gh_supported_archs.keys()):
-              # Then there are other target archs, so we need to build in LP
-              matrix["include"].append(
-                {"architecture": "-".join(set(target_archs)), "runner": gh_supported_archs["amd64"]}
-              )
-              BUILD_WITH_LPCI = 1
-            else:
-              for runner_arch, runner_name in gh_supported_archs.items():
-                if runner_arch in target_archs:
-                  matrix["include"].append(
-                    {"architecture": runner_arch, "runner": runner_name}
-                  )
-            
-            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-              print(f"build-for={matrix}", file=gh_out)
-              print(f"build-with-lpci={BUILD_WITH_LPCI}", file=gh_out)
+        run: |
+          ./src/build-rock/generate_matrix.py \
+          --rockfile-directory ${{ inputs.rockfile-directory }}
 
   build:
     needs: [prepare-multi-arch-matrix]
     strategy:
       fail-fast: true
       matrix: ${{ fromJSON(needs.prepare-multi-arch-matrix.outputs.build-for) }}
-    runs-on: ${{ matrix.runner }}
-    name: 'Build ${{ inputs.rock-name }} | ${{ matrix.architecture }}'
+    runs-on: ${{ matrix.runner }} # TODO: restore before release
+    name: 'Build ${{ inputs.rock-name }} | ${{ matrix.architecture }} '
     steps:
+  #     - name: Clone GitHub image repository
+  #       uses: actions/checkout@v4
+  #       id: clone-image-repo
+  #       continue-on-error: true
+  #       with:
+  #         repository: ${{ inputs.rock-repo }}
+  #         fetch-depth: 0
+  #     - name: Clone generic image repository
+  #       if: ${{ steps.clone-image-repo.outcome == 'failure' }}
+  #       run: |
+  #         git clone ${{ inputs.rock-repo }} .
+  #     - run: git checkout ${{ inputs.rock-repo-commit }}
+
+
       - name: Clone GitHub image repository
-        uses: actions/checkout@v4
         id: clone-image-repo
-        continue-on-error: true
-        with:
-          repository: ${{ inputs.rock-repo }}
-          fetch-depth: 0
-      - name: Clone generic image repository
-        if: ${{ steps.clone-image-repo.outcome == 'failure' }}
         run: |
-          git clone ${{ inputs.rock-repo }} .
-      - run: git checkout ${{ inputs.rock-repo-commit }}
+          git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
+
+
+      # TODO: enable before deployment
       - name: Build rock ${{ inputs.rock-name }}
         id: rockcraft
         if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 0
@@ -134,29 +147,34 @@ jobs:
         with:
           path: "${{ inputs.rockfile-directory }}"
           verbosity: debug
-      - uses: actions/setup-python@v5
-        if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
-        with:
-          python-version: '3.x'
-      - uses: nick-fields/retry@v3.0.0
-        name: Build multi-arch ${{ inputs.rock-name }} in Launchpad
-        if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
-        with:
-          timeout_minutes: 180
-          max_attempts: 4
-          polling_interval_seconds: 5
-          retry_wait_seconds: 30
-          command: |
-            set -ex
-            cd ${{ inputs.rockfile-directory }}
-            rocks_toolbox="$(mktemp -d)"
-            git clone --depth 1 --branch v1.1.2 https://github.com/canonical/rocks-toolbox $rocks_toolbox
-            ${rocks_toolbox}/rockcraft_lpci_build/requirements.sh
-            pip3 install -r ${rocks_toolbox}/rockcraft_lpci_build/requirements.txt
 
-            python3 ${rocks_toolbox}/rockcraft_lpci_build/rockcraft_lpci_build.py \
-              --lp-credentials-b64 "${{ secrets.LP_CREDENTIALS_B64 }}" \
-              --launchpad-accept-public-upload
+
+      # - uses: actions/setup-python@v5
+      #   if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
+      #   with:
+      #     python-version: '3.x'
+
+      # - uses: nick-fields/retry@v3.0.0
+      #   name: Build multi-arch ${{ inputs.rock-name }} in Launchpad
+      #   if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
+      #   with:
+      #     timeout_minutes: 180
+      #     max_attempts: 4
+      #     polling_interval_seconds: 5
+      #     retry_wait_seconds: 30
+      #     command: |
+      #       set -ex
+      #       cd ${{ inputs.rockfile-directory }}
+      #       rocks_toolbox="$(mktemp -d)"
+      #       git clone --depth 1 --branch v1.1.2 https://github.com/canonical/rocks-toolbox $rocks_toolbox
+      #       ${rocks_toolbox}/rockcraft_lpci_build/requirements.sh
+      #       pip3 install -r ${rocks_toolbox}/rockcraft_lpci_build/requirements.txt
+
+      #       python3 ${rocks_toolbox}/rockcraft_lpci_build/rockcraft_lpci_build.py \
+      #         --lp-credentials-b64 "${{ secrets.LP_CREDENTIALS_B64 }}" \
+      #         --launchpad-accept-public-upload
+
+
       - name: Rename rock OCI archive
         id: rock
         run: |

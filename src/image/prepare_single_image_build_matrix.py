@@ -111,8 +111,9 @@ if __name__ == "__main__":
             builds[img_number]["release"] = ""
 
     matrix = {"include": builds}
+    matrix_json = json.dumps(matrix)
     print(f"{args.oci_path} - build matrix:\n{json.dumps(matrix, indent=4)}")
     with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-        print(f"build-matrix={matrix}", file=gh_out)
+        print(f"build-matrix={matrix_json}", file=gh_out)
         print(f"release-to={release_to}", file=gh_out)
         print(f"revision-data-dir={args.revision_data_dir}", file=gh_out)
