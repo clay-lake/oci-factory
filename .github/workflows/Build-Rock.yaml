@@ -78,7 +78,7 @@ jobs:
           git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
 
 
-      - name: Build
+      - name: Build Target
         id: rockcraft
         uses: canonical/craft-actions/rockcraft-pack@main
         with:
@@ -91,6 +91,13 @@ jobs:
         run: |
               mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
               echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
+          path: ${{ env.ROCKS_CI_FOLDER }}
+          if-no-files-found: error
 
   lpci-build:
         needs: [configure-build]
@@ -116,7 +123,7 @@ jobs:
               git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
     
 
-          - name: Build
+          - name: Build Target
             uses: nick-fields/retry@v3.0.0
             with:
               timeout_minutes: 180
@@ -133,7 +140,7 @@ jobs:
                 echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
 
 
-          - name: Upload ${{ matrix.rock-name }} for ${{ matrix.architecture }}
+          - name: Upload Artifacts
             uses: actions/upload-artifact@v4
             with:
               name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
