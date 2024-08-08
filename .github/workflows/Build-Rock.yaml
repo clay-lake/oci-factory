@@ -57,14 +57,20 @@ jobs:
           ./src/build-rock/generate_matrix.py \
           --rockfile-directory ${{ inputs.rockfile-directory }}
 
+      - name: DELETE ME
+        run: cat $GITHUB_OUTPUT
+
   runner-build:
     needs: [configure-build]
+    # TODO: replace with better method for checking empty matrix
+    if: fromJSON(needs.configure-build.outputs.runner-build-matrix).include[0] != ''
     strategy:
       fail-fast: true
       matrix: ${{ fromJSON(needs.configure-build.outputs.runner-build-matrix) }}
     runs-on: ${{ matrix.runner }} 
     name: 'Runner Build ${{ inputs.rock-repo }} | ${{ inputs.rockfile-directory }} | ${{ matrix.architecture }} '
     steps:
+
 
       - name: Clone Repo
         id: clone-repo
@@ -88,7 +94,9 @@ jobs:
 
   lpci-build:
         needs: [configure-build]
-        strategy:
+        # TODO: replace with better method for checking empty matrix
+        if: fromJSON(needs.configure-build.outputs.lpci-build-matrix).include[0] != ''
+        strategy: 
           fail-fast: true
           matrix: ${{ fromJSON(needs.configure-build.outputs.lpci-build-matrix) }}
         runs-on: ubuntu-22.04

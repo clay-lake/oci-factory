@@ -25,7 +25,7 @@ jobs:
   #   secrets: inherit
 
   test-build-rock:
-    name: test Build-Rock workflow with mock-rock
+    name: Test Build Workflow  
     uses: ./.github/workflows/Build-Rock.yaml
     with:
       oci-archive-name: "mock-rock_1.1.rock"
