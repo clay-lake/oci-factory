@@ -7,14 +7,10 @@ on:
         description: "Final filename of the rock's OCI archive"
         type: string
         required: true
-      oci-factory-path:
-        description: "Path, in the OCI Factory, to this rock"
-        type: string
-        required: true
-      rock-name:
-        description: "Name of the rock"
-        type: string
-        required: true
+      # rock-name:
+      #   description: "Name of the rock"
+      #   type: string
+      #   required: true
       rock-repo:
         description: "Public Git repo where to build the rock from"
         type: string
@@ -22,7 +18,8 @@ on:
       rock-repo-commit:
         description: "Git ref from where to build the rock from"
         type: string
-        required: true
+        default: HEAD
+        required: false
       rockfile-directory:
         description: "Directory, in 'rock-repo', where to find the rockcraft.yaml file"
         type: string
@@ -39,21 +36,25 @@ jobs:
     outputs:
       build-for: ${{ steps.rock-platforms.outputs.build-for }} # TODO: refactor as platforms
       build-with-lpci: ${{ steps.rock-platforms.outputs.build-with-lpci }}
+      rock-name: ${{ steps.get-rock-name.outputs.rock-name }}
     steps:
 
       # setup
       - uses: actions/checkout@v4
-
+      - uses: mikefarah/yq@v4.44.3
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: pip install -r src/build-rock/requirements.txt
 
+
+      - name: Get rock-name
+        id: get-rock-name
+        run: echo "rock-name=$(yq '.name' "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/rockcraft.yaml")"  >> $GITHUB_OUTPUT
+
       - name: DELETE ME
         run: |
           echo oci-archive-name ${{ inputs.oci-archive-name }}
-          echo oci-factory-path ${{ inputs.oci-factory-path }}
-          echo rock-name ${{ inputs.rock-name }}
           echo rock-repo-commit ${{ inputs.rock-repo-commit }}
           echo rock-repo ${{ inputs.rock-repo }}
 
@@ -76,7 +77,7 @@ jobs:
       - name: Clone GitHub image repository
         id: clone-image-repo
         run: |
-          git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
+          git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }} 
 
 
 
@@ -84,26 +85,6 @@ jobs:
       #   run: |
       #     ls -R
       #     cat src/build-rock/requirements.txt
-
-
-                    
-
-
-
-      # TODO: Move validation to matrix generation stage
-      # - name: Validate image naming and base
-          # uses: mikefarah/yq@v4.44.3
-      #   working-directory: ${{ inputs.rockfile-directory }}
-      #   run: |
-      #     rock_name=`cat rockcraft.y*ml | yq -r .name`
-      #     if [[ "${{ inputs.oci-factory-path }}" != *"${rock_name}"* ]]
-      #     then
-      #       echo "ERROR: the rock's name '${rock_name}' must match the OCI folder name!"
-      #       exit 1
-      #     fi
-
-
-
 
       - name: Get rock archs
         id: rock-platforms
@@ -117,7 +98,7 @@ jobs:
       fail-fast: true
       matrix: ${{ fromJSON(needs.prepare-multi-arch-matrix.outputs.build-for) }}
     runs-on: ${{ matrix.runner }} # TODO: restore before release
-    name: 'Build ${{ inputs.rock-name }} | ${{ matrix.architecture }} '
+    name: 'Build ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }} | ${{ matrix.architecture }} '
     steps:
   #     - name: Clone GitHub image repository
   #       uses: actions/checkout@v4
@@ -140,7 +121,7 @@ jobs:
 
 
       # TODO: enable before deployment
-      - name: Build rock ${{ inputs.rock-name }}
+      - name: Build rock ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }}
         id: rockcraft
         if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 0
         uses: canonical/craft-actions/rockcraft-pack@main
@@ -155,7 +136,7 @@ jobs:
       #     python-version: '3.x'
 
       # - uses: nick-fields/retry@v3.0.0
-      #   name: Build multi-arch ${{ inputs.rock-name }} in Launchpad
+      #   name: Build multi-arch ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }} in Launchpad
       #   if: needs.prepare-multi-arch-matrix.outputs.build-with-lpci == 1
       #   with:
       #     timeout_minutes: 180
@@ -164,7 +145,7 @@ jobs:
       #     retry_wait_seconds: 30
       #     command: |
       #       set -ex
-      #       cd ${{ inputs.rockfile-directory }}
+      #       cd ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}
       #       rocks_toolbox="$(mktemp -d)"
       #       git clone --depth 1 --branch v1.1.2 https://github.com/canonical/rocks-toolbox $rocks_toolbox
       #       ${rocks_toolbox}/rockcraft_lpci_build/requirements.sh
@@ -185,9 +166,9 @@ jobs:
             echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
           else
             cp ${{ inputs.rockfile-directory }}/*.rock ${{ env.ROCKS_CI_FOLDER }}
-            echo "filename=${{ inputs.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
+            echo "filename=${{ needs.prepare-multi-arch-matrix.outputs.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
           fi
-      - name: Upload ${{ inputs.rock-name }} for ${{ matrix.architecture }}
+      - name: Upload ${{ needs.prepare-multi-arch-matrix.outputs.rock-name }} for ${{ matrix.architecture }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.oci-archive-name }}-${{ steps.rock.outputs.filename }}
