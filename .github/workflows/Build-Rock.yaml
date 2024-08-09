@@ -69,7 +69,7 @@ jobs:
         id: configure
         run: |
           ${{ env.SELF_DIR }}/src/build-rock/generate_matrix.py \
-          --rockfile-directory ${{ inputs.rockfile-directory }}
+          --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
 
       - name: DELETE ME
         run: cat $GITHUB_OUTPUT
