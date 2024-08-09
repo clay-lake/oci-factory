@@ -91,37 +91,44 @@ jobs:
     name: 'runner-build | ${{ matrix.architecture }} '
     steps:
 
-
-      - name: Clone Repo
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.rock-repo }}
-          path: ${{ env.ROCK_REPO_DIR }}
-          ref: ${{ inputs.rock-repo-commit }}
-          submodules: 'recursive'
-
-
-      - name: Build Target
-        id: rockcraft
-        uses: canonical/craft-actions/rockcraft-pack@main
-        with:
-          path: "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
-          verbosity: debug
-
-
-      - name: Collect Artifacts
-        id: collect-artifacts
+      - name: DELETEME
         run: |
-              mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
-              echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
+          echo ${{ matrix.runner }} 
+          echo ${{ matrix.architecture }}
+          echo ${{ needs.configure-build.outputs.runner-build-matrix }}
+          echo  
 
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
-          path: ${{ env.ROCKS_CI_FOLDER }}
-          if-no-files-found: error
+      # - name: Clone Repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ${{ inputs.rock-repo }}
+      #     path: ${{ env.ROCK_REPO_DIR }}
+      #     ref: ${{ inputs.rock-repo-commit }}
+      #     submodules: 'recursive'
+
+
+      # - name: Build Target
+      #   id: rockcraft
+      #   uses: canonical/craft-actions/rockcraft-pack@main
+      #   with:
+      #     path: "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
+      #     verbosity: debug
+
+
+      # - name: Collect Artifacts
+      #   id: collect-artifacts
+      #   run: |
+      #         mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
+      #         echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
+
+
+      # - name: Upload Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
+      #     path: ${{ env.ROCKS_CI_FOLDER }}
+      #     if-no-files-found: error
 
   # lpci-build:
   #       needs: [configure-build]
