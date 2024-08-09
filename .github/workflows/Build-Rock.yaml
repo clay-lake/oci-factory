@@ -28,6 +28,7 @@ env:
   ROCK_REPO_DIR: rock-repo # path where the image repo is cloned to
   ROCKS_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
   SELF_REPO: clay-lake/oci-factory # TODO: replace with parent repo when merging back in
+  SELF_DIR: oci-factory/
   SELF_BRANCH: refactor-workflows
 
 jobs:
@@ -42,6 +43,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ${{ env.SELF_REPO }}
+          path: ${{ env.SELF_DIR }}
           ref: ${{ env.SELF_BRANCH }}
           fetch-depth: 1
 
@@ -51,7 +53,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - run: pip install -r src/build-rock/requirements.txt
+      - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/requirements.txt
 
 
         # TODO add support here for token, ref, recursive clone and shallow clone
@@ -70,7 +72,7 @@ jobs:
       - name: Configure
         id: configure
         run: |
-          ./src/build-rock/generate_matrix.py \
+          ${{ env.SELF_DIR }}/src/build-rock/generate_matrix.py \
           --rockfile-directory ${{ inputs.rockfile-directory }}
 
       - name: DELETE ME
@@ -131,10 +133,11 @@ jobs:
 
           # TODO: assert that credentials should be present if this job is executed
     
-          # setup
+      # setup
           - uses: actions/checkout@v4
             with:
               repository: ${{ env.SELF_REPO }}
+              path: ${{ env.SELF_DIR }}
               ref: ${{ env.SELF_BRANCH }}
               fetch-depth: 1
 
@@ -142,7 +145,7 @@ jobs:
           - uses: actions/setup-python@v5
             with:
               python-version: "3.x"
-          - run: pip install -r src/build-rock/requirements.txt
+          - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/requirements.txt
           
     
           - name: Clone Repo
@@ -160,7 +163,7 @@ jobs:
               max_attempts: 4
               polling_interval_seconds: 5
               retry_wait_seconds: 30
-              command: src/build-rock/lpci_build.sh
+              command: ${{ env.SELF_DIR }}/src/build-rock/lpci_build.sh
 
                   
           - name: Collect Artifacts
