@@ -59,9 +59,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.rock-repo }}
-          ref: ${{ inputs.rock-repo-commit }}
           path: ${{ env.ROCK_REPO_DIR }}
           submodules: 'recursive'
+          
+      - name: Checkout Commit
+        run: cd ${{ env.ROCK_REPO_DIR }} && git checkout ${{ inputs.rock-repo-commit }}
+        
 
 
       - name: Configure
