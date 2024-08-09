@@ -78,7 +78,7 @@ jobs:
           ${{ env.SELF_DIR }}/src/build-rock/configure/generate_matrix.py \
             --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}" \
             --lpci-fallback "${{ toJSON(inputs.lpci-fallback) }}" \
-            --config '${{ toJSON(inputs.arch-map) }}' # important: use single quotes to match input
+            --config ${{ toJSON(inputs.arch-map) }} # important: do not use quotes here
 
       - name: DELETE ME
         run: cat $GITHUB_OUTPUT
