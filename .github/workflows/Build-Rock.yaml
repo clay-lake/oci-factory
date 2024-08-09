@@ -87,8 +87,9 @@ jobs:
     # strategy:
     #   fail-fast: true
     #   matrix: ${{ fromJSON(needs.configure-build.outputs.runner-build-matrix) }}
+    runs-on: 'ubuntu-22.04'
     # runs-on: ${{ matrix.runner }} 
-    # name: 'runner-build | ${{ matrix.architecture }} '
+    name: 'runner-build | ${{ matrix.architecture }} '
     steps:
 
       - name: DELETEME
