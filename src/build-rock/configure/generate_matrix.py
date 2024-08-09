@@ -33,7 +33,9 @@ def get_target_archs(rockcraft: dict) -> list:
     for platf, values in rock_platforms.items():
         
         if isinstance(values, dict) and "build-for" in values:
-            if isinstance(arches := values["build-for"], list):
+            # TODO: Should this be "build-on"? 
+            # https://documentation.ubuntu.com/rockcraft/en/latest/reference/rockcraft.yaml/#platforms-entry-build-on 
+            if isinstance(arches := values["build-for"], list): 
                 target_archs.update(arches)
             elif isinstance(values, str):
                 target_archs.add(arches)
@@ -44,7 +46,7 @@ def get_target_archs(rockcraft: dict) -> list:
 
 
 def configure_matrices(
-    target_archs: list, runner_config: dict, lp_fallback: bool
+    target_archs: list, arch_map: dict, lp_fallback: bool
 ) -> dict:
     """Sort build into appropriate build matrices"""
 
@@ -52,7 +54,7 @@ def configure_matrices(
     build_matrices = {name.value: {"include": []} for name in MATRIX_NAMES}
 
     # Check if we have runners for all supported architectures
-    if missing_archs := set(target_archs) - set(runner_config.keys()):
+    if missing_archs := set(target_archs) - set(arch_map.keys()):
 
         # raise exception if we cannot fallback to LP builds
         if not lp_fallback:
@@ -67,7 +69,7 @@ def configure_matrices(
 
     else:
         # configure runner matrix for list of supported runners
-        for runner_arch, runner_name in runner_config.items():
+        for runner_arch, runner_name in arch_map.items():
             if runner_arch in target_archs:
                 build_matrices[MATRIX_NAMES.RUNNER.value]["include"].append(
                     {"architecture": runner_arch, "runner": runner_name}
@@ -97,21 +99,21 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--rockfile-directory",
-        help="Path where to directory containing rockcraft.yaml",
+        help="Path where to directory containing rockcraft.yaml.",
         required=True,
     )
 
     parser.add_argument(
         "--lpci-fallback",
-        help="revert to lpci if architectures are not supported",
-        action="store_true",
+        help="Revert to lpci if architectures are not supported. <true|false>",
         required=True,
+        type=str
     )
 
     parser.add_argument(
-        "--runner-config",
-        help="revert to lpci if architectures are not supported",
-        default='{"amd64": "ubuntu-latest"}',
+        "--config",
+        help="JSON mapping arch to runner for matrix generation.",
+        required=True,
     )
 
     args = parser.parse_args()
@@ -120,13 +122,21 @@ if __name__ == "__main__":
     with open(f"{args.rockfile_directory}/rockcraft.yaml") as rf:
         rockcraft_yaml = yaml.safe_load(rf)
 
-    # load runner config
-    runner_config = json.loads(args.runner_config)
+    # load config
+    arch_map = json.loads(args.config)
 
-    rock_name = rockcraft_yaml["name"]
 
-    target_archs = get_target_archs(runner_config)
+    # TODO: improve input checking
+    try:
+        lpci_fallback = json.loads(args.lpci_fallback.lower())
 
-    build_matrices = configure_matrices(target_archs)
+        if not isinstance(lpci_fallback, bool):
+            raise TypeError("Expected bool type")
+        
+    except (TypeError, json.decoder.JSONDecodeError) as exc: 
+        raise ValueError("--lpci-fallback expected true or false value") from exc
+
+    target_archs = get_target_archs(rockcraft_yaml)
+    build_matrices = configure_matrices(target_archs, arch_map, lpci_fallback)
 
     set_build_config_outputs(rockcraft_yaml["name"], build_matrices)

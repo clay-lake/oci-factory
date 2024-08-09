@@ -7,21 +7,31 @@ on:
   workflow_call:
     inputs:
       oci-archive-name:
-        description: "Final filename of the rock's OCI archive"
+        description: "Final filename of the rock's OCI archive."
         type: string
         required: true
       rock-repo:
-        description: "Public Git repo where to build the rock from"
+        description: "Public Git repo where to build the rock from."
         type: string
         required: true
       rock-repo-commit:
-        description: "Git ref from where to build the rock from"
+        description: "Git ref from where to build the rock from."
         type: string
         required: true
       rockfile-directory:
-        description: "Directory, in 'rock-repo', where to find the rockcraft.yaml file"
+        description: "Directory, in 'rock-repo', where to find the rockcraft.yaml file."
         type: string
         required: true
+      arch-map:
+        description: "JSON string mapping target architecture to runner."
+        type: string
+        required: false
+        default: '{"amd64": "ubuntu-latest"}'
+      lpci-fallback:
+        description: 'Enable fallback to Launchpad build when runners for target arch are not available.'
+        type: boolean
+        required: false
+        default: false
 
 
 env:
@@ -47,9 +57,6 @@ jobs:
           ref: ${{ env.SELF_BRANCH }}
           fetch-depth: 1
 
-      - name: DELETE ME
-        run: ls -R
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
@@ -70,6 +77,8 @@ jobs:
         run: |
           ${{ env.SELF_DIR }}/src/build-rock/generate_matrix.py \
           --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
+          --lpci-fallback "${{ toJSON(inputs.lpci-fallback) }}"
+          --config "${{ toJSON(inputs.lpci-fallback) }}"
 
       - name: DELETE ME
         run: cat $GITHUB_OUTPUT
@@ -82,7 +91,7 @@ jobs:
       fail-fast: true
       matrix: ${{ fromJSON(needs.configure-build.outputs.runner-build-matrix) }}
     runs-on: ${{ matrix.runner }} 
-    name: 'Runner Build ${{ inputs.rock-repo }} | ${{ inputs.rockfile-directory }} | ${{ matrix.architecture }} '
+    name: 'runner-build | ${{ matrix.architecture }} '
     steps:
 
 
@@ -109,6 +118,7 @@ jobs:
               mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
               echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
 
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -124,19 +134,18 @@ jobs:
           fail-fast: true
           matrix: ${{ fromJSON(needs.configure-build.outputs.lpci-build-matrix) }}
         runs-on: ubuntu-22.04
-        name: 'LPCI Build ${{ inputs.rock-repo }} | ${{ inputs.rockfile-directory }} | ${{ matrix.architecture }} '
+        name: 'lpci-build | ${{ matrix.architecture }} '
         steps:
 
           # TODO: assert that credentials should be present if this job is executed
     
-      # setup
+          # setup
           - uses: actions/checkout@v4
             with:
               repository: ${{ env.SELF_REPO }}
               path: ${{ env.SELF_DIR }}
               ref: ${{ env.SELF_BRANCH }}
               fetch-depth: 1
-
 
           - uses: actions/setup-python@v5
             with:
@@ -152,6 +161,7 @@ jobs:
               ref: ${{ inputs.rock-repo-commit }}
               submodules: 'recursive'
 
+              
           - name: Build Target
             uses: nick-fields/retry@v3.0.0
             with:
