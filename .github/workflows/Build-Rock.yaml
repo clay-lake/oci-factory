@@ -61,7 +61,6 @@ jobs:
           repository: ${{ inputs.rock-repo }}
           ref: ${{ inputs.rock-repo-commit }}
           path: ${{ env.ROCK_REPO_DIR }}
-          fetch-depth: 1
           submodules: 'recursive'
 
 
@@ -92,7 +91,6 @@ jobs:
           repository: ${{ inputs.rock-repo }}
           ref: ${{ inputs.rock-repo-commit }}
           path: ${{ env.ROCK_REPO_DIR }}
-          fetch-depth: 1
           submodules: 'recursive'
 
 
@@ -150,7 +148,6 @@ jobs:
               repository: ${{ inputs.rock-repo }}
               ref: ${{ inputs.rock-repo-commit }}
               path: ${{ env.ROCK_REPO_DIR }}
-              fetch-depth: 1
               submodules: 'recursive'
 
           - name: Build Target
