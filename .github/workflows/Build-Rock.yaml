@@ -76,9 +76,9 @@ jobs:
         id: configure
         run: |
           ${{ env.SELF_DIR }}/src/build-rock/configure/generate_matrix.py \
-          --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
-          --lpci-fallback "${{ toJSON(inputs.lpci-fallback) }}"
-          --config "${{ toJSON(inputs.lpci-fallback) }}"
+            --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}" \
+            --lpci-fallback "${{ toJSON(inputs.lpci-fallback) }}" \
+            --config "${{ toJSON(inputs.lpci-fallback) }}"
 
       - name: DELETE ME
         run: cat $GITHUB_OUTPUT
