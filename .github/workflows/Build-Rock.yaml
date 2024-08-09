@@ -60,7 +60,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/requirements.txt
+      - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/configure/requirements.txt
 
 
       - name: Clone Repo
@@ -75,7 +75,7 @@ jobs:
       - name: Configure
         id: configure
         run: |
-          ${{ env.SELF_DIR }}/src/build-rock/generate_matrix.py \
+          ${{ env.SELF_DIR }}/src/build-rock/configure/generate_matrix.py \
           --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
           --lpci-fallback "${{ toJSON(inputs.lpci-fallback) }}"
           --config "${{ toJSON(inputs.lpci-fallback) }}"
@@ -150,7 +150,7 @@ jobs:
           - uses: actions/setup-python@v5
             with:
               python-version: "3.x"
-          - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/requirements.txt
+          - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/lpci_build/requirements.txt
           
     
           - name: Clone Repo
@@ -169,7 +169,7 @@ jobs:
               max_attempts: 4
               polling_interval_seconds: 5
               retry_wait_seconds: 30
-              command: ${{ env.SELF_DIR }}/src/build-rock/lpci_build.sh
+              command: ${{ env.SELF_DIR }}/src/build-rock/lpci_build/lpci_build.sh
 
                   
           - name: Collect Artifacts
