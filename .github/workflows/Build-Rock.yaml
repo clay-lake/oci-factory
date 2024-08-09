@@ -28,6 +28,7 @@ env:
   ROCK_REPO_DIR: rock-repo # path where the image repo is cloned to
   ROCKS_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
   SELF_REPO: clay-lake/oci-factory # TODO: replace with parent repo when merging back in
+  SELF_BRANCH: refactor-workflows
 
 jobs:
   configure-build:
@@ -41,6 +42,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ${{ env.SELF_REPO }}
+          ref: ${{ env.SELF_BRANCH }}
+          fetch-depth: 0
 
       - name: DELETE ME
         run: ls -R
@@ -122,7 +125,11 @@ jobs:
           # setup
           - uses: actions/checkout@v4
             with:
-              repo: ${{ env.SELF_REPO }}
+              repository: ${{ env.SELF_REPO }}
+              ref: ${{ env.SELF_BRANCH }}
+              fetch-depth: 0
+              
+
           - uses: actions/setup-python@v5
             with:
               python-version: "3.x"
