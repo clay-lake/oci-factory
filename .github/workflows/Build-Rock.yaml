@@ -182,31 +182,31 @@ jobs:
               path: ${{ env.ROCKS_CI_FOLDER }}
               if-no-files-found: error
 
-  # assemble-rock:
-  #   needs: [configure-build, build]
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-  #       id: download
-  #     - run: sudo apt update && sudo apt install buildah -y
-  #     - name: Merge single-arch rocks into multi-arch OCI archive
-  #       run: |
-  #         set -xe
-  #         ls ./${{ inputs.oci-archive-name }}*
-  #         buildah manifest create multi-arch-rock
-  #         for rock in `find ${{ inputs.oci-archive-name }}*/*.rock`
-  #         do
-  #           test -f $rock
-  #           buildah manifest add multi-arch-rock oci-archive:$rock
-  #         done
-  #         buildah manifest push --all multi-arch-rock oci-archive:${{ inputs.oci-archive-name }}
-  #     - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ inputs.oci-archive-name }}
-  #         path: ${{ inputs.oci-archive-name }}
-  #         if-no-files-found: error
-  #     - uses: actions/cache/save@v4
-  #       with:
-  #         path: ${{ inputs.oci-archive-name }}
-  #         key: ${{ github.run_id }}-${{ inputs.oci-archive-name }}
+  assemble-rock:
+    needs: [configure-build, runner-build, lpci-build]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        id: download
+      - run: sudo apt update && sudo apt install buildah -y
+      - name: Merge single-arch rocks into multi-arch OCI archive
+        run: |
+          set -xe
+          ls ./${{ inputs.oci-archive-name }}*
+          buildah manifest create multi-arch-rock
+          for rock in `find ${{ inputs.oci-archive-name }}*/*.rock`
+          do
+            test -f $rock
+            buildah manifest add multi-arch-rock oci-archive:$rock
+          done
+          buildah manifest push --all multi-arch-rock oci-archive:${{ inputs.oci-archive-name }}
+      - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.oci-archive-name }}
+          path: ${{ inputs.oci-archive-name }}
+          if-no-files-found: error
+      - uses: actions/cache/save@v4
+        with:
+          path: ${{ inputs.oci-archive-name }}
+          key: ${{ github.run_id }}-${{ inputs.oci-archive-name }}
