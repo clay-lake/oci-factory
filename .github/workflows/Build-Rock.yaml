@@ -62,10 +62,11 @@ jobs:
         with:
           repository: ${{ inputs.rock-repo }}
           path: ${{ env.ROCK_REPO_DIR }}
+          ref: ${{ inputs.rock-repo-commit }}
           submodules: 'recursive'
           
-      - name: Checkout Commit
-        run: cd ${{ env.ROCK_REPO_DIR }} && git checkout ${{ inputs.rock-repo-commit }}
+      # - name: Checkout Commit
+      #   run: cd ${{ env.ROCK_REPO_DIR }} && git checkout ${{ inputs.rock-repo-commit }}
         
 
 
