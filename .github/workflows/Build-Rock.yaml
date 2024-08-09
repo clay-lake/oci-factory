@@ -185,6 +185,9 @@ jobs:
   assemble-rock:
     needs: [configure-build, runner-build, lpci-build]
     runs-on: ubuntu-22.04
+    # Always run even if one of the *-build jobs are skiped
+    # Nice example from benjamin-bergia/github-workflow-patterns...
+    if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
     steps:
       - uses: actions/download-artifact@v4
         id: download
