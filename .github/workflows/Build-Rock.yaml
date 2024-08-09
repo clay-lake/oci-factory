@@ -82,13 +82,13 @@ jobs:
 
   runner-build:
     needs: [configure-build]
-    # TODO: replace with better method for checking empty matrix
-    if: fromJSON(needs.configure-build.outputs.runner-build-matrix).include[0] != ''
-    strategy:
-      fail-fast: true
-      matrix: ${{ fromJSON(needs.configure-build.outputs.runner-build-matrix) }}
-    runs-on: ${{ matrix.runner }} 
-    name: 'runner-build | ${{ matrix.architecture }} '
+    # # TODO: replace with better method for checking empty matrix
+    # if: fromJSON(needs.configure-build.outputs.runner-build-matrix).include[0] != ''
+    # strategy:
+    #   fail-fast: true
+    #   matrix: ${{ fromJSON(needs.configure-build.outputs.runner-build-matrix) }}
+    # runs-on: ${{ matrix.runner }} 
+    # name: 'runner-build | ${{ matrix.architecture }} '
     steps:
 
       - name: DELETEME
