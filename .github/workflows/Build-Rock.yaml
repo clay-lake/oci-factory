@@ -56,7 +56,6 @@ jobs:
       - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/requirements.txt
 
 
-        # TODO add support here for token, ref, recursive clone and shallow clone
       - name: Clone Repo
         uses: actions/checkout@v4
         with:
@@ -64,11 +63,7 @@ jobs:
           path: ${{ env.ROCK_REPO_DIR }}
           ref: ${{ inputs.rock-repo-commit }}
           submodules: 'recursive'
-          
-      # - name: Checkout Commit
-      #   run: cd ${{ env.ROCK_REPO_DIR }} && git checkout ${{ inputs.rock-repo-commit }}
         
-
 
       - name: Configure
         id: configure
@@ -95,8 +90,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.rock-repo }}
-          ref: ${{ inputs.rock-repo-commit }}
           path: ${{ env.ROCK_REPO_DIR }}
+          ref: ${{ inputs.rock-repo-commit }}
           submodules: 'recursive'
 
 
@@ -153,8 +148,8 @@ jobs:
             uses: actions/checkout@v4
             with:
               repository: ${{ inputs.rock-repo }}
-              ref: ${{ inputs.rock-repo-commit }}
               path: ${{ env.ROCK_REPO_DIR }}
+              ref: ${{ inputs.rock-repo-commit }}
               submodules: 'recursive'
 
           - name: Build Target
