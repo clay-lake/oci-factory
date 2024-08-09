@@ -43,7 +43,7 @@ jobs:
         with:
           repository: ${{ env.SELF_REPO }}
           ref: ${{ env.SELF_BRANCH }}
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: DELETE ME
         run: ls -R
@@ -56,9 +56,13 @@ jobs:
 
         # TODO add support here for token, ref, recursive clone and shallow clone
       - name: Clone Repo
-        id: clone-repo
-        run: |
-          git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }} 
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.rock-repo }}
+          ref: ${{ inputs.rock-repo-commit }}
+          path: ${{ env.ROCK_REPO_DIR }}
+          fetch-depth: 1
+          submodules: 'recursive'
 
 
       - name: Configure
@@ -83,9 +87,13 @@ jobs:
 
 
       - name: Clone Repo
-        id: clone-repo
-        run: |
-          git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.rock-repo }}
+          ref: ${{ inputs.rock-repo-commit }}
+          path: ${{ env.ROCK_REPO_DIR }}
+          fetch-depth: 1
+          submodules: 'recursive'
 
 
       - name: Build Target
@@ -127,8 +135,8 @@ jobs:
             with:
               repository: ${{ env.SELF_REPO }}
               ref: ${{ env.SELF_BRANCH }}
-              fetch-depth: 0
-              
+              fetch-depth: 1
+
 
           - uses: actions/setup-python@v5
             with:
@@ -136,11 +144,14 @@ jobs:
           - run: pip install -r src/build-rock/requirements.txt
           
     
-          - name: Clone GitHub image repository
-            id: clone-repo
-            run: |
-              git clone https://github.com/${{ inputs.rock-repo }}.git ${{ env.ROCK_REPO_DIR }}
-    
+          - name: Clone Repo
+            uses: actions/checkout@v4
+            with:
+              repository: ${{ inputs.rock-repo }}
+              ref: ${{ inputs.rock-repo-commit }}
+              path: ${{ env.ROCK_REPO_DIR }}
+              fetch-depth: 1
+              submodules: 'recursive'
 
           - name: Build Target
             uses: nick-fields/retry@v3.0.0
