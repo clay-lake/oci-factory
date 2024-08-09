@@ -100,96 +100,96 @@ jobs:
           echo  
 
 
-      # - name: Clone Repo
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: ${{ inputs.rock-repo }}
-      #     path: ${{ env.ROCK_REPO_DIR }}
-      #     ref: ${{ inputs.rock-repo-commit }}
-      #     submodules: 'recursive'
+      - name: Clone Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.rock-repo }}
+          path: ${{ env.ROCK_REPO_DIR }}
+          ref: ${{ inputs.rock-repo-commit }}
+          submodules: 'recursive'
 
 
-      # - name: Build Target
-      #   id: rockcraft
-      #   uses: canonical/craft-actions/rockcraft-pack@main
-      #   with:
-      #     path: "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
-      #     verbosity: debug
+      - name: Build Target
+        id: rockcraft
+        uses: canonical/craft-actions/rockcraft-pack@main
+        with:
+          path: "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
+          verbosity: debug
 
 
-      # - name: Collect Artifacts
-      #   id: collect-artifacts
-      #   run: |
-      #         mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
-      #         echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
+      - name: Collect Artifacts
+        id: collect-artifacts
+        run: |
+              mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ steps.rockcraft.outputs.rock }} "$_"
+              echo "filename=$(basename ${{ steps.rockcraft.outputs.rock }})" >> $GITHUB_OUTPUT
 
 
-      # - name: Upload Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
-      #     path: ${{ env.ROCKS_CI_FOLDER }}
-      #     if-no-files-found: error
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
+          path: ${{ env.ROCKS_CI_FOLDER }}
+          if-no-files-found: error
 
-  # lpci-build:
-  #       needs: [configure-build]
-  #       # TODO: replace with better method for checking empty matrix
-  #       if: fromJSON(needs.configure-build.outputs.lpci-build-matrix).include[0] != ''
-  #       strategy: 
-  #         fail-fast: true
-  #         matrix: ${{ fromJSON(needs.configure-build.outputs.lpci-build-matrix) }}
-  #       runs-on: ubuntu-22.04
-  #       name: 'lpci-build | ${{ matrix.architecture }} '
-  #       steps:
+  lpci-build:
+        needs: [configure-build]
+        # TODO: replace with better method for checking empty matrix
+        if: fromJSON(needs.configure-build.outputs.lpci-build-matrix).include[0] != ''
+        strategy: 
+          fail-fast: true
+          matrix: ${{ fromJSON(needs.configure-build.outputs.lpci-build-matrix) }}
+        runs-on: ubuntu-22.04
+        name: 'lpci-build | ${{ matrix.architecture }} '
+        steps:
 
-  #         # TODO: assert that credentials should be present if this job is executed
+          # TODO: assert that credentials should be present if this job is executed
     
-  #         # setup
-  #         - uses: actions/checkout@v4
-  #           with:
-  #             repository: ${{ env.SELF_REPO }}
-  #             path: ${{ env.SELF_DIR }}
-  #             ref: ${{ env.SELF_BRANCH }}
-  #             fetch-depth: 1
+          # setup
+          - uses: actions/checkout@v4
+            with:
+              repository: ${{ env.SELF_REPO }}
+              path: ${{ env.SELF_DIR }}
+              ref: ${{ env.SELF_BRANCH }}
+              fetch-depth: 1
 
-  #         - uses: actions/setup-python@v5
-  #           with:
-  #             python-version: "3.x"
-  #         - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/lpci_build/requirements.txt
+          - uses: actions/setup-python@v5
+            with:
+              python-version: "3.x"
+          - run: pip install -r ${{ env.SELF_DIR }}/src/build-rock/lpci_build/requirements.txt
           
     
-  #         - name: Clone Repo
-  #           uses: actions/checkout@v4
-  #           with:
-  #             repository: ${{ inputs.rock-repo }}
-  #             path: ${{ env.ROCK_REPO_DIR }}
-  #             ref: ${{ inputs.rock-repo-commit }}
-  #             submodules: 'recursive'
+          - name: Clone Repo
+            uses: actions/checkout@v4
+            with:
+              repository: ${{ inputs.rock-repo }}
+              path: ${{ env.ROCK_REPO_DIR }}
+              ref: ${{ inputs.rock-repo-commit }}
+              submodules: 'recursive'
 
               
-  #         - name: Build Target
-  #           uses: nick-fields/retry@v3.0.0
-  #           with:
-  #             timeout_minutes: 180
-  #             max_attempts: 4
-  #             polling_interval_seconds: 5
-  #             retry_wait_seconds: 30
-  #             command: ${{ env.SELF_DIR }}/src/build-rock/lpci_build/lpci_build.sh
+          - name: Build Target
+            uses: nick-fields/retry@v3.0.0
+            with:
+              timeout_minutes: 180
+              max_attempts: 4
+              polling_interval_seconds: 5
+              retry_wait_seconds: 30
+              command: ${{ env.SELF_DIR }}/src/build-rock/lpci_build/lpci_build.sh
 
                   
-  #         - name: Collect Artifacts
-  #           id: collect-artifacts
-  #           run: |
-  #               mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/*.rock "$_"
-  #               echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
+          - name: Collect Artifacts
+            id: collect-artifacts
+            run: |
+                mkdir -p ${{ env.ROCKS_CI_FOLDER }} && cp ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/*.rock "$_"
+                echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
 
 
-  #         - name: Upload Artifacts
-  #           uses: actions/upload-artifact@v4
-  #           with:
-  #             name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
-  #             path: ${{ env.ROCKS_CI_FOLDER }}
-  #             if-no-files-found: error
+          - name: Upload Artifacts
+            uses: actions/upload-artifact@v4
+            with:
+              name: ${{ inputs.oci-archive-name }}-${{ steps.collect-artifacts.outputs.filename }}
+              path: ${{ env.ROCKS_CI_FOLDER }}
+              if-no-files-found: error
 
   # assemble-rock:
   #   needs: [configure-build, build]

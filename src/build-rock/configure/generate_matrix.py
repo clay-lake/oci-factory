@@ -15,8 +15,8 @@ from typing import Optional
 
 
 class MATRIX_NAMES(Enum):
-    RUNNER = "runner_build_matrix"
-    LPCI = "lpci_build_matrix"
+    RUNNER = "runner-build-matrix"
+    LPCI = "lpci-build-matrix"
 
 
 class MissingArchSupport(Exception):
