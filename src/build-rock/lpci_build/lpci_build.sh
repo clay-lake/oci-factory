@@ -1,11 +1,49 @@
 #! /bin/bash
 
 
-set -ex
+set -e
 
-# TODO: use getopt here
-ROCKCRAFT_DIR=$1
-LC_CREADENTIALS_B64=$2
+
+function usage(){
+    echo
+    echo "$(basename "$0") -d <rockcraft directory> -c <launchpad credentials>"
+    echo
+    echo "Build local rockcraft project on Launchpad."
+    echo
+    echo -e "-d \\t Directory to rockcraft project file. "
+    echo -e "-c \\t Launchpad credentials. "
+}
+
+while getopts "c:d:" opt
+do
+    case $opt in
+        d)
+            ROCKCRAFT_DIR="$OPTARG"
+            ;;
+        c)
+            LC_CREDENTIALS_B64="$OPTARG"
+            ;;
+        ?)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ -z "$ROCKCRAFT_DIR" ]
+then
+    echo "Error: Missing rockcraft directory argument (-d)"
+    usage
+    exit 1
+fi
+
+if [ -z "$LC_CREDENTIALS_B64" ]
+then
+    echo "Error: Missing launchpad credentials argument (-c)"
+    usage
+    exit 1
+fi
+
 
 cd "$ROCKCRAFT_DIR"
 rocks_toolbox="$(mktemp -d)"
@@ -15,5 +53,6 @@ ${rocks_toolbox}/rockcraft_lpci_build/requirements.sh
 pip3 install -r ${rocks_toolbox}/rockcraft_lpci_build/requirements.txt
 
 python3 ${rocks_toolbox}/rockcraft_lpci_build/rockcraft_lpci_build.py \
-    --lp-credentials-b64 "$LC_CREADENTIALS_B64}" \
+    --lp-credentials-b64 "$LC_CREDENTIALS_B64" \
     --launchpad-accept-public-upload
+    
