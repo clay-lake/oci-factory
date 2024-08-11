@@ -216,7 +216,6 @@ jobs:
 
       - name: Merge single-arch rocks into multi-arch OCI archive
         run: |
-          ls -lash
           ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/merge_rocks.sh \
           -n "${{ inputs.oci-archive-name }}" \
           -d "${{ inputs.oci-archive-name }}"
