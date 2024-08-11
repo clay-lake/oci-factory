@@ -206,7 +206,7 @@ jobs:
           path: ${{ env.OCI_FACTORY_DIR }}
           ref: ${{ env.OCI_FACTORY_BRANCH }}
           fetch-depth: 1
-          
+
       - run: ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/requirements.sh
 
 
@@ -216,7 +216,8 @@ jobs:
 
       - name: Merge single-arch rocks into multi-arch OCI archive
         run: |
-          src/build-rock/assemble-rock/merge_rocks.sh \
+          ls -lash
+          ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/merge_rocks.sh \
           -n "${{ inputs.oci-archive-name }}" \
           -d "${{ inputs.oci-archive-name }}"
 
