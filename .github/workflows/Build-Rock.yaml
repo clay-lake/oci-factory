@@ -200,6 +200,13 @@ jobs:
     steps:
 
       # Job Setup
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OCI_FACTORY_REPO }}
+          path: ${{ env.OCI_FACTORY_DIR }}
+          ref: ${{ env.OCI_FACTORY_BRANCH }}
+          fetch-depth: 1
+          
       - run: ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/requirements.sh
 
 
@@ -213,7 +220,7 @@ jobs:
           -n "${{ inputs.oci-archive-name }}" \
           -d "${{ inputs.oci-archive-name }}"
 
-          
+
       - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
         uses: actions/upload-artifact@v4
         with:
