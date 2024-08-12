@@ -212,13 +212,16 @@ jobs:
 
       - uses: actions/download-artifact@v4
         id: download
+        with:
+          path: ${{ env.ROCK_CI_FOLDER }} 
 
 
       - name: Merge single-arch rocks into multi-arch OCI archive
         run: |
+          ls -lash "${{ env.ROCK_CI_FOLDER }}"
           ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/merge_rocks.sh \
           -n "${{ inputs.oci-archive-name }}" \
-          -d "${{ inputs.oci-archive-name }}"
+          -d "${{ env.ROCK_CI_FOLDER }}"
 
 
       - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
