@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/*"
+      - "src/**"
       # - "!.github/workflows/CLA-Check.yaml"
       # - "!.github/workflows/PR-Validator.yaml"
       # - "!.github/workflows/_Auto-updates.yaml"
@@ -11,7 +12,6 @@ on:
       # - "!.github/workflows/CLI-Client.yaml"
       # - "examples/**"
       # - "oci/mock*"
-      # - "src/**"
       # - "!src/workflow-engine/**"
       # - "!src/cli-client/**"
 
@@ -80,4 +80,3 @@ jobs:
       rock-repo-commit: 7f080b50ba656538aee3819889090c173f06debd
       rockfile-directory: examples/mock-rock/1.1/
 
-      
