@@ -210,13 +210,14 @@ jobs:
       - run: ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/requirements.sh
 
 
-      - uses: actions/download-artifact@v4
+      - name: Download Single Arch Rocks
+        uses: actions/download-artifact@v4
         id: download
         with:
           path: ${{ env.ROCK_CI_FOLDER }} 
 
 
-      - name: Merge single-arch rocks into multi-arch OCI archive
+      - name: Merge Single Arch Rocks
         run: |
           ls -lash "${{ env.ROCK_CI_FOLDER }}"
           ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/merge_rocks.sh \
@@ -224,15 +225,16 @@ jobs:
           -d "${{ env.ROCK_CI_FOLDER }}"
 
 
-      - name: Upload multi-arch ${{ inputs.oci-archive-name }} OCI archive
+      - name: Upload Multi Arch Rock
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.oci-archive-name }}
           path: ${{ inputs.oci-archive-name }}
           if-no-files-found: error
 
-
-      - uses: actions/cache/save@v4
+          
+      - name: Cache Multi Arch Rock
+        uses: actions/cache/save@v4
         with:
           path: ${{ inputs.oci-archive-name }}
           key: ${{ github.run_id }}-${{ inputs.oci-archive-name }}
