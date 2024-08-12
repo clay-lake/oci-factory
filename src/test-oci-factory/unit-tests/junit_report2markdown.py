@@ -4,14 +4,16 @@ import xml.etree.ElementTree as ET
 
 def print_element(element, output = None):
    
+    print(f"<pre>", file = output)
+
     for key, value in element.attrib.items():
-        print(" "*4, f"{key}: {value}")
+        print(f"{key}: {value}", file = output)
     
     if element.text is not None:
         if content := element.text.strip():
-            print(" "*4, f"text: \n{content}")
+            print(f"text: \n{content}", file = output)
 
-
+    print(f"</pre>", file = output)
 
 def print_testsuite_pie_chart(testsuite, output = None):
 
@@ -38,8 +40,6 @@ def print_testsuite_pie_chart(testsuite, output = None):
 def print_testsuite_report(testsuite, output = None):
 
     print_testsuite_pie_chart(testsuite, output)
-
-    test_file = testsuite
 
     for testcase in testsuite.findall('testcase'):
 
