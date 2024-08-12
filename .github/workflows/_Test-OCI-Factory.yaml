@@ -35,6 +35,7 @@ jobs:
     # Trigger unit tests across the repository
     name: Unit Tests
     runs-on: ubuntu-22.04
+    # TODO: Iterate over testable directories with matrix
     steps:
 
       # Job Setup
@@ -57,13 +58,14 @@ jobs:
       - name: Run pytest
         run: |
           python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
-          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/junit_report2markdown.py \
+          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/junit_to_markdown.py \
             --input-junit "${{ env.PYTEST_RESULT_PATH }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload pytest Result
         uses: actions/upload-artifact@v4
         with:
           path: ${{ env.PYTEST_RESULT_PATH }}
+          name: "${{ env.PYTEST_RESULT_PATH }}.zip"
           if-no-files-found: error
 
 
