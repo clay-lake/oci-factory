@@ -44,10 +44,10 @@ def test_configure_matrices():
         ["amd64"], {"amd64": "ubuntu-22.04"}, False
     )
     expected_result = {
-        "runner_build_matrix": {
+        "runner-build-matrix": {
             "include": [{"architecture": "amd64", "runner": "ubuntu-22.04"}]
         },
-        "lpci_build_matrix": {"include": []},
+        "lpci-build-matrix": {"include": []},
     }
 
     assert build_matrices == expected_result
@@ -67,8 +67,8 @@ def test_configure_matrices_lcpi_fallback():
         ["arm64"], {"amd64": "ubuntu-22.04"}, True
     )
     expected_result = {
-        'runner_build_matrix': {'include': []},
-        'lpci_build_matrix': {'include': [{'architecture': 'arm64'}]}
+        'runner-build-matrix': {'include': []},
+        'lpci-build-matrix': {'include': [{'architecture': 'arm64'}]}
     }
 
     assert build_matrices == expected_result
@@ -78,10 +78,10 @@ def test_configure_matrices_lcpi_fallback():
 def test_set_build_config_outputs():
 
     test_build_matrices = {
-        "runner_build_matrix": {
+        "runner-build-matrix": {
             "include": [{"architecture": "amd64", "runner": "ubuntu-22.04"}]
         },
-        "lpci_build_matrix": {"include": []},
+        "lpci-build-matrix": {"include": []},
     }
 
     with TemporaryDirectory() as tmp:
@@ -95,8 +95,8 @@ def test_set_build_config_outputs():
 
 
     expected_result = """rock-name=test
-runner_build_matrix={"include": [{"architecture": "amd64", "runner": "ubuntu-22.04"}]}
-lpci_build_matrix={"include": []}
+runner-build-matrix={"include": [{"architecture": "amd64", "runner": "ubuntu-22.04"}]}
+lpci-build-matrix={"include": []}
 """
 
     assert gh_output == expected_result
