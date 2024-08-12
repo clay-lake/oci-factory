@@ -20,7 +20,7 @@ env:
   OCI_FACTORY_REPO: clay-lake/oci-factory # TODO: replace with parent repo when merging back
   OCI_FACTORY_DIR: oci-factory/
   OCI_FACTORY_BRANCH: refactor-workflows
-  PYTEST_JUNIT_PATH: pytest_results.xml
+  PYTEST_RESULT_PATH: pytest_results.xml
 
 jobs:
   # test-workflows:
@@ -53,12 +53,12 @@ jobs:
 
       - name: Run pytest
         run: |
-          python3 -m pytest --junit-xml "${{ env.PYTEST_JUNIT_PATH }}"
+          python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
 
       - name: Upload pytest Result
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.PYTEST_JUNIT_PATH }}
+          path: ${{ env.PYTEST_RESULT_PATH }}
           if-no-files-found: error
 
 
