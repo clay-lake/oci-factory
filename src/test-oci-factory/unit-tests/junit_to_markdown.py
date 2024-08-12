@@ -2,8 +2,13 @@
 import xml.etree.ElementTree as ET
 
 
+"""
+Generate markdown from a JUnit XML report for $GITHUB_STEP_SUMMARY 
+"""
+
 def print_element(element, output = None):
-   
+    """Generically display attrs and text of a element"""
+    # TODO: add better formatting for children
     print(f"<pre>", file = output)
 
     for key, value in element.attrib.items():
@@ -16,6 +21,7 @@ def print_element(element, output = None):
     print(f"</pre>", file = output)
 
 def print_testsuite_pie_chart(testsuite, output = None):
+    """Generate a pie chart showing test status from testsuite element"""
 
     chart_data = {
         "failed": int(testsuite.attrib.get("failures", 0)),
@@ -37,6 +43,7 @@ def print_testsuite_pie_chart(testsuite, output = None):
     print("```", file=output)
 
 def get_testcase_status(testcase):
+    """Get status for individual testcase element status"""
 
     if testcase.find("failure"):
         return ":x:"
@@ -49,7 +56,9 @@ def get_testcase_status(testcase):
 
 
 def print_testsuite_report(testsuite, output = None):
+    """Print complete testsuite element Report"""
 
+    # use pie chart header as title
     print_testsuite_pie_chart(testsuite, output)
     print_element(testsuite, output)
 
@@ -62,7 +71,7 @@ def print_testsuite_report(testsuite, output = None):
         print(f"<summary>{test_status} {test_name} - {test_class}</summary>", file=output)
 
         for child in testcase.iter():
-            print(child.tag)
+            print(f"<i>{child.tag}</i>", file=output)
             print_element(child)
 
         print("</details>", file=output)
