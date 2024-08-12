@@ -57,6 +57,8 @@ jobs:
       - name: Run pytest
         run: |
           python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
+          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/junit_report2markdown.py \
+            --input-junit "${{ env.PYTEST_RESULT_PATH }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload pytest Result
         uses: actions/upload-artifact@v4
