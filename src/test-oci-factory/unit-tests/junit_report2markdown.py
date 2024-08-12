@@ -40,6 +40,7 @@ def print_testsuite_pie_chart(testsuite, output = None):
 def print_testsuite_report(testsuite, output = None):
 
     print_testsuite_pie_chart(testsuite, output)
+    print_element(testsuite, output)
 
     for testcase in testsuite.findall('testcase'):
 
@@ -48,8 +49,6 @@ def print_testsuite_report(testsuite, output = None):
         test_class =  testcase.attrib['classname']
         print(f"<summary>{test_name} - {test_class}</summary>", file=output)
 
-        print_element(testcase)
-        
         for child in testcase.iter():
             print(child.tag)
             print_element(child)
