@@ -36,6 +36,17 @@ def print_testsuite_pie_chart(testsuite, output = None):
 
     print("```", file=output)
 
+def get_testcase_status(testcase):
+
+    if testcase.find("failure"):
+        return ":x:"
+    elif testcase.find("error"):
+        return ":warning:"
+    elif testcase.find("skipped"):
+        return ":information_source:"
+    else: # passed
+        return ":white_check_mark:"
+
 
 def print_testsuite_report(testsuite, output = None):
 
@@ -45,9 +56,10 @@ def print_testsuite_report(testsuite, output = None):
     for testcase in testsuite.findall('testcase'):
 
         print("<details>", file=output)
+        test_status = get_testcase_status(testcase)
         test_name = testcase.attrib['name'].replace('_', ' ').title()
         test_class =  testcase.attrib['classname']
-        print(f"<summary>{test_name} - {test_class}</summary>", file=output)
+        print(f"<summary>{test_status} {test_name} - {test_class}</summary>", file=output)
 
         for child in testcase.iter():
             print(child.tag)
