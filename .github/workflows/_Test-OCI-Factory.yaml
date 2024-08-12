@@ -15,6 +15,13 @@ on:
       # - "!src/workflow-engine/**"
       # - "!src/cli-client/**"
 
+
+env:
+  OCI_FACTORY_REPO: clay-lake/oci-factory # TODO: replace with parent repo when merging back
+  OCI_FACTORY_DIR: oci-factory/
+  OCI_FACTORY_BRANCH: refactor-workflows
+  PYTEST_JUNIT_PATH: pytest_results.xml
+
 jobs:
   # test-workflows:
   #   name: Trigger internal tests for mock-rock
@@ -24,11 +31,46 @@ jobs:
   #     upload: true
   #   secrets: inherit
 
-  test-build-rock:
-    name: Test Build Workflow  
+  unit-tests:
+    # Trigger unit tests across the repository
+    name: Unit Tests
+    runs-on: ubuntu-22.04
+    steps:
+
+      # Job Setup
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OCI_FACTORY_REPO }}
+          path: ${{ env.OCI_FACTORY_DIR }}
+          ref: ${{ env.OCI_FACTORY_BRANCH }}
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/requirements.txt
+
+
+      - name: Run pytest
+        run: |
+          python3 -m pytest --junit-xml "${{ env.PYTEST_JUNIT_PATH }}"
+
+      - name: Upload pytest Result
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.PYTEST_JUNIT_PATH }}
+          if-no-files-found: error
+
+
+
+
+  integration-test-build-rock:
+    # Test the Build-Rock workflow by calling a build with the mock-rock
+    name: Integration Test - Build-Rock
     uses: ./.github/workflows/Build-Rock.yaml
     with:
       oci-archive-name: "mock-rock_1.1.rock"
       rock-repo: canonical/oci-factory
+      # TODO replace commit below with 'main' once changes have been merged back
       rock-repo-commit: 7f080b50ba656538aee3819889090c173f06debd
       rockfile-directory: examples/mock-rock/1.1/
