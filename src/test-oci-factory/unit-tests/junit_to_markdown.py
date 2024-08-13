@@ -45,11 +45,11 @@ def print_testsuite_pie_chart(testsuite, output = None):
 def get_testcase_status(testcase):
     """Get status for individual testcase element status"""
 
-    if testcase.find("failure"):
+    if testcase.find("failure") is not None:
         return ":x:"
-    elif testcase.find("error"):
+    elif testcase.find("error") is not None:
         return ":warning:"
-    elif testcase.find("skipped"):
+    elif testcase.find("skipped") is not None:
         return ":information_source:"
     else: # passed
         return ":white_check_mark:"
