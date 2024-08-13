@@ -90,7 +90,7 @@ jobs:
       - name: Download Image
         run: |
           docker pull hello-world:latest
-          docker save busybox > image.tar
+          docker save hello-world > image.tar
           mv image.tar image.rock
 
       - name: Cache Multi Arch Rock
