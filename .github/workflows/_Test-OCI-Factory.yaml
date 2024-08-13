@@ -92,6 +92,7 @@ jobs:
           docker pull hello-world:latest
           docker save hello-world > image.tar
           mv image.tar image.rock
+          ls -lash
 
       - name: Configure Cache
         id: configure
