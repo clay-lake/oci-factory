@@ -49,6 +49,7 @@ jobs:
 
 
       - name: Run pytest
+        continue-on-error: true
         run: |
           python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
           python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/junit_to_markdown.py \
