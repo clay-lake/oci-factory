@@ -1,4 +1,4 @@
-name: _Test OCI Factory | mock-rock
+name: Test OCI Factory 
 on:
   workflow_dispatch:
   push:
@@ -93,15 +93,19 @@ jobs:
           docker save hello-world > image.tar
           mv image.tar image.rock
 
-      - name: Cache Multi Arch Rock
+      - name: Configure Cache
+        id: configure
+      # TODO: replace with generated name
+        run: |
+          echo "cache-key=${{ github.run_id }}-test-test"  >> $GITHUB_OUTPUT
+  
+
+      - name: Cache Test Rock
         uses: actions/cache/save@v4
         with:
           path: image.rock
-          key: test-test
+          key: ${{ steps.configure.outputs.cache-key }}
 
-      - name: Set Cache Key
-        run: |
-          echo "cache-key=test-test"  >> $GITHUB_OUTPUT
 
   integration-test-test-rock:
     # Test the Build-Rock workflow by calling a build with the mock-rock
@@ -109,5 +113,5 @@ jobs:
     needs: [setup-test-rock]
     uses: ./.github/workflows/Test-Rock.yaml
     with:
-      cache-key: test-test
+      cache-key: ${{ needs.setup-test-rock.outputs.cache-key }}
 
