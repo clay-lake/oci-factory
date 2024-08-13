@@ -104,7 +104,7 @@ jobs:
       - name: Cache Test Rock
         uses: actions/cache/save@v4
         with:
-          path: *.rock
+          path: '*.rock'
           key: ${{ steps.configure.outputs.cache-key }}
 
 
