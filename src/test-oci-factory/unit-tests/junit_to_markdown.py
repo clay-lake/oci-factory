@@ -31,6 +31,12 @@ def print_testsuite_pie_chart(testsuite, output = None):
 
     chart_data["pass"] = int(testsuite.attrib.get("tests",0)) - chart_data["failed"] - chart_data["error"] - chart_data["skipped"]
 
+    # remove empty wedges
+    for key, value in chart_data.items():
+        if value == 0:
+            del chart_data[key]
+
+
     print("```mermaid", file=output)
 
     # theme colors in order: pass, failed, error, skipped
