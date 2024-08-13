@@ -9,7 +9,7 @@ Generate markdown from a JUnit XML report for $GITHUB_STEP_SUMMARY
 def print_element(element, output = None):
     """Generically display attrs and text of a element"""
     # TODO: add better formatting for children
-    print(f"```text", file = output)
+    print(f"<pre>", file = output)
 
     for key, value in element.attrib.items():
         print(f"{key}: {value}", file = output)
@@ -18,7 +18,7 @@ def print_element(element, output = None):
         if content := element.text.strip():
             print(f"text: \n{content}", file = output)
 
-    print(f"```", file = output)
+    print(f"</pre>", file = output)
 
 def print_testsuite_pie_chart(testsuite, output = None):
     """Generate a pie chart showing test status from testsuite element"""
