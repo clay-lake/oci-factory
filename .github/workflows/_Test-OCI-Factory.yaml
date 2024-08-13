@@ -75,4 +75,39 @@ jobs:
       # TODO replace commit below with 'main' once changes have been merged back
       rock-repo-commit: 7f080b50ba656538aee3819889090c173f06debd
       rockfile-directory: examples/mock-rock/1.1/
+    
+
+
+
+  setup-test-rock:
+    name: Setup - Test-Rock
+    runs-on: ubuntu-22.04
+    outputs: 
+        cache-key: ${{ steps.configure.outputs.cache-key }}
+    steps:
+      
+      # TODO: cleanup
+      - name: Download Image
+        run: |
+          docker pull hello-world:latest
+          docker save busybox > image.tar
+          mv image.tar image.rock
+
+      - name: Cache Multi Arch Rock
+        uses: actions/cache/save@v4
+        with:
+          path: image.rock
+          key: test-test
+
+      - name: Set Cache Key
+        run: |
+          echo "cache-key=test-test"  >> $GITHUB_OUTPUT
+
+  integration-test-test-rock:
+    # Test the Build-Rock workflow by calling a build with the mock-rock
+    name: Integration Test - Test-Rock
+    needs: [setup-test-rock]
+    uses: ./.github/workflows/Test-Rock.yaml
+    with:
+      cache-key: test-test
 
