@@ -123,10 +123,10 @@ jobs:
       - uses: canonical/rocks-toolbox/install_umoci@actions
 
 
-      # - uses: actions/cache/restore@v4
-      #   with:
-      #     path: ${{ env.TEST_IMAGE_NAME}}
-      #     key: ${{ inputs.cache-key }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.TEST_IMAGE_NAME}}
+          key: ${{ inputs.cache-key }}
 
       # - name: Run Umoci tests
       #   run: |
