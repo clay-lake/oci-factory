@@ -201,21 +201,21 @@ jobs:
         run: |
           docker run -e CI=true --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
-            -v $PWD/src/tests/.dive-ci.yaml:/.dive-ci.yaml \
+            -v $PWD/src/test-rock/.dive-ci.yaml:/.dive-ci.yaml \
             ${{ env.DIVE_IMAGE }} \
             ${{ env.TEST_IMAGE_NAME}}:${{ env.TEST_IMAGE_TAG }} --ci-config /.dive-ci.yaml
 
 
-  # test-vulnerabilities:
-  #   name: Vulnerability scan
-  #   needs: [fetch-oci-image]
-  #   uses: ./.github/workflows/Vulnerability-Scan.yaml
-  #   with:
-  #     oci-archive-name: "${{ inputs.oci-archive-name }}"
-  #     oci-image-path: "${{ inputs.oci-image-path }}"
-  #     cache-key: "${{ input.cache-key }}"
-  #     vulnerability-report-suffix: "${{ inputs.vulnerability-report-suffix}}"
-  #   secrets: inherit
+  test-vulnerabilities:
+    name: Vulnerability scan
+    needs: [fetch-oci-image]
+    uses: ./.github/workflows/Vulnerability-Scan.yaml
+    with:
+      oci-archive-name: "${{ inputs.oci-archive-name }}"
+      oci-image-path: "${{ inputs.oci-image-path }}"
+      cache-key: "${{ input.cache-key }}"
+      vulnerability-report-suffix: "${{ inputs.vulnerability-report-suffix}}"
+    secrets: inherit
 
 
   # test-malware:
