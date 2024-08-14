@@ -101,11 +101,20 @@ jobs:
           echo "cache-key=${{ github.run_id }}-test-test"  >> $GITHUB_OUTPUT
   
 
-      - name: Cache Test Rock
-        uses: actions/cache/save@v4
+      # - name: Cache Test Rock
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: '*.rock'
+      #     key: ${{ steps.configure.outputs.cache-key }}
+
+
+      - name: Upload Multi Arch Rock
+        uses: actions/upload-artifact@v4
         with:
-          path: '*.rock'
-          key: ${{ steps.configure.outputs.cache-key }}
+          name: image.rock
+          path: image.rock
+          if-no-files-found: error
+
 
 
   integration-test-test-rock:
