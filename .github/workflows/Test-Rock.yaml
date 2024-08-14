@@ -107,7 +107,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ env.TEST_IMAGE_NAME}}
-          key: ${{ steps.save-cache.key }}
+          key: ${{ steps.save-cache.outputs.key }}
 
 
  
