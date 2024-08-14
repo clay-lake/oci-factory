@@ -20,11 +20,12 @@ on:
         description: 'OCI image artifact name'
         required: true
         type: string
-      # vulnerability-report-suffix:
-      #   description: 'Suffix for the vulnerability report artefact'
-      #   required: false
-      #   type: string
-      #   default: '.vulnerability-report.json'
+      vulnerability-report-suffix:
+        # TODO check if requirement
+        description: 'Suffix for the vulnerability report artefact'
+        required: false
+        type: string
+        default: '.vulnerability-report.json'
   # workflow_dispatch:
   #   inputs:
   #     oci-archive-name:
@@ -208,12 +209,10 @@ jobs:
 
   test-vulnerabilities:
     name: Vulnerability scan
-    needs: [fetch-oci-image]
+    needs: [setup]
     uses: ./.github/workflows/Vulnerability-Scan.yaml
     with:
       oci-archive-name: "${{ inputs.oci-archive-name }}"
-      oci-image-path: "${{ inputs.oci-image-path }}"
-      cache-key: "${{ input.cache-key }}"
       vulnerability-report-suffix: "${{ inputs.vulnerability-report-suffix}}"
     secrets: inherit
 
