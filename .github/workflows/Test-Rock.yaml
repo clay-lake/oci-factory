@@ -3,7 +3,7 @@ name: Test Rock
 on:
   workflow_call:
     inputs:
-      # oci-image-name:
+      # oci-archive-name:
       #   description: 'Name of the image to be fetched and tested'
       #   required: true
       #   type: string
@@ -27,7 +27,7 @@ on:
       #   default: '.vulnerability-report.json'
   # workflow_dispatch:
   #   inputs:
-  #     oci-image-name:
+  #     oci-archive-name:
   #       description: 'Name of the image to be fetched and tested'
   #       required: true
   #     oci-image-path:
@@ -96,7 +96,7 @@ jobs:
           docker run --rm -v $PWD:/workdir \
             -w /workdir \
             ${{ env.SKOPEO_IMAGE }} \
-            copy oci-archive:${{ inputs.oci-image-name }} \
+            copy oci-archive:${{ inputs.oci-archive-name }} \
             oci:${{ env.TEST_IMAGE_NAME}}:${{ env.TEST_IMAGE_TAG }}
 
       - name: Set Cache Key
@@ -205,7 +205,7 @@ jobs:
   #   needs: [fetch-oci-image]
   #   uses: ./.github/workflows/Vulnerability-Scan.yaml
   #   with:
-  #     oci-image-name: "${{ inputs.oci-image-name }}"
+  #     oci-archive-name: "${{ inputs.oci-archive-name }}"
   #     oci-image-path: "${{ inputs.oci-image-path }}"
   #     cache-key: "${{ input.cache-key }}"
   #     vulnerability-report-suffix: "${{ inputs.vulnerability-report-suffix}}"
@@ -222,7 +222,7 @@ jobs:
   #     - uses: actions/cache/restore@v4
   #       with:
   #         path: ${{ env.TEST_IMAGE_NAME}}
-  #         key: ${{ github.run_id }}-${{ inputs.oci-image-name }}-${{ env.TEST_IMAGE_NAME }}
+  #         key: ${{ github.run_id }}-${{ inputs.oci-archive-name }}-${{ env.TEST_IMAGE_NAME }}
       
   #     - name: Install Umoci
   #       run: |
