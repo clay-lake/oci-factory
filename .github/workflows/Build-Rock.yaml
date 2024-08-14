@@ -49,7 +49,7 @@ jobs:
     outputs:
       runner-build-matrix: ${{ steps.configure.outputs.runner-build-matrix }} 
       lpci-build-matrix: ${{ steps.configure.outputs.lpci-build-matrix }} 
-      cache-key: ${{ steps.configure.outputs.cache-key }} 
+      # cache-key: ${{ steps.configure.outputs.cache-key }} 
     steps:
 
       # Job Setup
@@ -82,7 +82,8 @@ jobs:
             --config ${{ toJSON(inputs.arch-map) }} # important: do not use quotes here
 
             # TODO: set uuid in generate_matrix.py and rename to configure_job.py
-            echo "cache-key=${{github.run_id }}-${{ inputs.oci-archive-name }}"  >> $GITHUB_OUTPUT
+            # TODO: Disabled see note at bottom about cache
+            # echo "cache-key=${{github.run_id }}-${{ inputs.oci-archive-name }}"  >> $GITHUB_OUTPUT
 
 
   runner-build:
@@ -183,7 +184,9 @@ jobs:
         id: collect-artifacts
         run: |
             mkdir -p ${{ env.ROCK_CI_FOLDER }} && cp ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/*.rock "$_"
-            echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
+
+          # TODO: determine why cache is not working  
+          # echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -235,9 +238,9 @@ jobs:
           path: ${{ inputs.oci-archive-name }}
           if-no-files-found: error
 
-          
-      - name: Cache Multi Arch Rock
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ inputs.oci-archive-name }}
-          key: ${{ needs.configure-build.outputs.cache-key}}
+      # TODO: determine why cache is not working          
+      # - name: Cache Multi Arch Rock
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: ${{ inputs.oci-archive-name }}
+      #     key: ${{ needs.configure-build.outputs.cache-key}}

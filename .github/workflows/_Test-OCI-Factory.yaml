@@ -21,6 +21,8 @@ env:
   OCI_FACTORY_DIR: oci-factory/
   OCI_FACTORY_BRANCH: refactor-workflows
   PYTEST_RESULT_PATH: pytest_results.xml
+  TEST_IMAGE_NAME: hello-world
+  TEST_IMAGE_TAG: latest
 
 jobs:
 
@@ -77,44 +79,29 @@ jobs:
       rockfile-directory: examples/mock-rock/1.1/
     
 
-
-
   setup-test-rock:
     name: Setup - Test-Rock
     runs-on: ubuntu-22.04
     outputs: 
-        cache-key: ${{ steps.configure.outputs.cache-key }}
+        oci-archive-name: ${{ steps.configure.outputs.oci-archive-name }}
     steps:
       
-      # TODO: cleanup
-      - name: Download Image
-        run: |
-          docker pull hello-world:latest
-          docker save hello-world > image.tar
-          mv image.tar image.rock
-          ls -lash
-
-      - name: Configure Cache
+      - name: Configure
         id: configure
-      # TODO: replace with generated name
         run: |
-          echo "cache-key=${{ github.run_id }}-test-test"  >> $GITHUB_OUTPUT
-  
+          echo "oci-archive-name=${{env.TEST_IMAGE_TAG}}_${{ env.TEST_IMAGE_TAG }}.rock"  >> $GITHUB_OUTPUT
 
-      # - name: Cache Test Rock
-      #   uses: actions/cache/save@v4
-      #   with:
-      #     path: '*.rock'
-      #     key: ${{ steps.configure.outputs.cache-key }}
+      - name: Download Test Image from DockerHub
+        run: |
+          docker pull ${{env.TEST_IMAGE_TAG}}:${{ env.TEST_IMAGE_TAG }}
+          docker save ${{env.TEST_IMAGE_TAG}}:${{ env.TEST_IMAGE_TAG }} > ${{ steps.configure.outputs.oci-archive-name }}
 
-
-      - name: Upload Multi Arch Rock
+      - name: Upload Test Image
         uses: actions/upload-artifact@v4
         with:
-          name: image.rock
-          path: image.rock
+          name: ${{ steps.configure.outputs.oci-archive-name }}
+          path: ${{ steps.configure.outputs.oci-archive-name }}
           if-no-files-found: error
-
 
 
   integration-test-test-rock:
@@ -123,5 +110,5 @@ jobs:
     needs: [setup-test-rock]
     uses: ./.github/workflows/Test-Rock.yaml
     with:
-      cache-key: ${{ needs.setup-test-rock.outputs.cache-key }}
+      oci-archive-name: ${{ needs.setup-test-rock.outputs.oci-archive-name }}
 
