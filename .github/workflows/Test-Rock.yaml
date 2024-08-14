@@ -16,7 +16,7 @@ on:
       #   required: true
       #   default: 'cache'
       #   type: string
-      cache-key:
+      oci-archive-name:
         description: 'OCI image cache key'
         required: true
         type: string
