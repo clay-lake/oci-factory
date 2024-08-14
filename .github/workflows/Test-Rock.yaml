@@ -64,7 +64,7 @@ env:
   # ROCK_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
   TEST_IMAGE_NAME: 'test-img'
   TEST_IMAGE_TAG: 'test'
-  # SKOPEO_IMAGE: 'quay.io/skopeo/stable:v1.15.1'
+  SKOPEO_IMAGE: 'quay.io/skopeo/stable:v1.15.1'
   # DIVE_IMAGE: 'wagoodman/dive:v0.12'
 
 jobs:
@@ -91,7 +91,6 @@ jobs:
           path: ${{ inputs.oci-archive-name }}
 
       - name: Unpack
-      # TODO: why do we skopeo vs docker load?
         run: |
           # from OCI ARCHIVE to OCI
           docker run --rm -v $PWD:/workdir \
