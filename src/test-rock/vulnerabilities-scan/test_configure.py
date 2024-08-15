@@ -18,33 +18,33 @@ def test_set_report_name():
     assert result["report-name"].find(name) >= 0, "result does not contain name"
 
 
-def set_trivyignore_exists(archive_dir: str):
+def test_set_trivyignore_exists():
 
     with TemporaryDirectory() as tmp:
 
+        archive_path = Path(tmp) / "test"
         trivyignore_path = Path(tmp) / ".trivyignore"
         trivyignore_path.touch()
 
-        result = configure.set_trivyignore(tmp)
+        result = configure.set_trivyignore(archive_path)
 
         assert isinstance(result, dict), "Check return type"
         assert "trivyignore-path" in result, "Check output name"
+        assert result["trivyignore-path"] == str(trivyignore_path), "result path is invalid"
 
-        assert result["trivyignore-path"] == trivyignore_path, "result path is invalid"
 
-
-def set_trivyignore_does_not_exists(archive_dir: str):
+def test_set_trivyignore_does_not_exists():
 
     with TemporaryDirectory() as tmp:
 
+        archive_path = Path(tmp) / "test"
         trivyignore_path = Path(tmp) / ".trivyignore"
 
-        result = configure.set_trivyignore(tmp)
+        result = configure.set_trivyignore(archive_path)
 
         assert isinstance(result, dict), "Check return type"
         assert "trivyignore-path" in result, "Check output name"
-
-        assert result["trivyignore-path"] == trivyignore_path, "result path is invalid"
+        assert result["trivyignore-path"] == str(trivyignore_path), "result path is invalid"
 
 
 def test_set_github_output():

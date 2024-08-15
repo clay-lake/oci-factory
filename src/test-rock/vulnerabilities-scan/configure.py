@@ -13,10 +13,10 @@ def set_report_name(archive_name: str, report_suffix:str = "json") -> dict:
     return outputs
 
 
-def set_trivyignore(archive_dir: str):
+def set_trivyignore(archive_path: str):
     """Set the trivyignore-path output. Touch the trivyignore-path if non existant."""
 
-    trivyignore_path = Path(archive_dir) / ".trivyignore"
+    trivyignore_path = (Path(archive_path).parent / ".trivyignore").resolve()
     
     # TODO: confirm that this is a required behaviors, then add a test for it
     if not trivyignore_path.exists():
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--archive-dir",
-        help="Directory of archive to configure scan for.",
+        "--archive-path",
+        help="Path of archive to configure scan for.",
         type=str,
         required=True,
     )
