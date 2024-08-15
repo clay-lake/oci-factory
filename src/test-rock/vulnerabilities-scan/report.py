@@ -73,36 +73,43 @@ def process_report(report, last_scan, output_file = None):
 
     for result in report["scanner"]["result"]["Results"]: # .scanner.result.Results[]
 
-        for vln in result["Vulnerabilities"]:
-            
-            vulnerabilities.append(
-                Vulnerability(
-                    vln.get("Severity"),
-                    result.get("Target"),
-                    result.get("Class"),
-                    vln.get("VulnerabilityID"),
-                    vln.get("PkgName"),
-                    vln.get("LastModifiedDate")
+        if "Vulnerabilities" in result: # there may be no Vulnerabilities
+            for vln in result["Vulnerabilities"]:
+                
+                vulnerabilities.append(
+                    Vulnerability(
+                        vln.get("Severity"),
+                        result.get("Target"),
+                        result.get("Class"),
+                        vln.get("VulnerabilityID"),
+                        vln.get("PkgName"),
+                        vln.get("LastModifiedDate")
+                        )
                     )
-                )
             
-    vulnerabilities = sorted(vulnerabilities, key=vuln_key, reverse=True)
 
+    if vulnerabilities:
 
-    new_vulnerabilities = list(
-            filter(
-                lambda v: v.last_modified > last_scan, 
-                vulnerabilities
-                )
-            )
+        vulnerabilities_sorted = sorted(vulnerabilities, key=vuln_key, reverse=True)
 
-    if last_scan is not None:
-        print(f"**{len(new_vulnerabilities)} new vulnerabilities found since {last_scan.isoformat()}**", file=output_file)
-    
-    # print table of vulnerabilities 
-    print(Vulnerability.get_header(), file=output_file)
-    for row in vulnerabilities:
-        print(row.get_row(), file=output_file)
+        if last_scan is not None:
+            new_vulnerabilities = list(
+                    filter(
+                        lambda v: v.last_modified > last_scan, 
+                        vulnerabilities_sorted
+                        )
+                    )
+
+            print(f"**{len(new_vulnerabilities)} new vulnerabilities found since {last_scan.isoformat()}**", file=output_file)
+        
+        # print table of vulnerabilities 
+        print(Vulnerability.get_header(), file=output_file)
+        for row in vulnerabilities_sorted:
+            print(row.get_row(), file=output_file)
+
+    else:
+        print(f"**No vulnerabilities found!**", file=output_file)
+
 
 
 if __name__ == "__main__":

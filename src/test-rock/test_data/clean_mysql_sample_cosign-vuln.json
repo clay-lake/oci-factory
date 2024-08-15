@@ -1,0 +1,202 @@
+{
+  "invocation": {
+    "parameters": null,
+    "uri": "",
+    "event_id": "",
+    "builder.id": ""
+  },
+  "scanner": {
+    "uri": "pkg:github/aquasecurity/trivy@0.38.1",
+    "version": "0.38.1",
+    "db": {
+      "uri": "",
+      "version": ""
+    },
+    "result": {
+      "SchemaVersion": 2,
+      "ArtifactName": "test-img:test",
+      "ArtifactType": "container_image",
+      "Metadata": {
+        "OS": {
+          "Family": "oracle",
+          "Name": "9.4"
+        },
+        "ImageID": "sha256:7ce93a845a8a98c89bd58a5e45fe71277ca5f52177c88046858a6a0af969ba74",
+        "DiffIDs": [
+          "sha256:2606c15a4838dfb909dab29f47c601a797f657f51a35005bd06d01da891d813c",
+          "sha256:3dea2aeae1c6d0298ad76ae1f0c38b9e4169bc3a7182d3b6207ff18b72ccdb89",
+          "sha256:71bc13a2962ed139d840b10a1429bb6655a471f470917933adc4e49105b2ea33",
+          "sha256:31d776291afdf48f3f1f287b7c1885632490262c1bdee1f76162b7419d41eaab",
+          "sha256:c2182014683d67b7fdeda662d4b099a67936f446bb66244d5514c9b47214bdb0",
+          "sha256:afbd47451a753700b11a0cd27b3bef97b5d601ecd6f9a2de80627a9f096b83fa",
+          "sha256:be2b3692128b7efb2dbc769dbe83ac82823b20fa292195bb49c030b827aacb66",
+          "sha256:a34bb1401e4caff2725d372089d220bb068dc0129ad305011da96af8f10c9f94",
+          "sha256:ad5af488d607ef402926c37236d8d93470a73f2a83e317b4410115186d0f793a",
+          "sha256:feceac7d17e74808c01badccebbe437dc6f4616bf5f0680a9543648e9ed9aac5"
+        ],
+        "RepoTags": [
+          "test-img:test"
+        ],
+        "ImageConfig": {
+          "architecture": "amd64",
+          "created": "2024-07-22T22:36:10Z",
+          "history": [
+            {
+              "created": "2024-07-08T23:20:26Z",
+              "created_by": "/bin/sh -c #(nop) ADD file:61bb1ff5b435c8d45a692de54806f1a1d44cbd176c28877e360a68f4d0e7de6f in / "
+            },
+            {
+              "created": "2024-07-08T23:20:26Z",
+              "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/bash\"]",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eux; \tgroupadd --system --gid 999 mysql; \tuseradd --system --uid 999 --gid 999 --home-dir /var/lib/mysql --no-create-home mysql # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "ENV GOSU_VERSION=1.17",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eux; \tarch=\"$(uname -m)\"; \tcase \"$arch\" in \t\taarch64) gosuArch='arm64' ;; \t\tx86_64) gosuArch='amd64' ;; \t\t*) echo \u003e\u00262 \"error: unsupported architecture: '$arch'\"; exit 1 ;; \tesac; \tcurl -fL -o /usr/local/bin/gosu.asc \"https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$gosuArch.asc\"; \tcurl -fL -o /usr/local/bin/gosu \"https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$gosuArch\"; \texport GNUPGHOME=\"$(mktemp -d)\"; \tgpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \tgpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \trm -rf \"$GNUPGHOME\" /usr/local/bin/gosu.asc; \tchmod +x /usr/local/bin/gosu; \tgosu --version; \tgosu nobody true # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eux; \tmicrodnf install -y \t\tbzip2 \t\tgzip \t\topenssl \t\txz \t\tzstd \t\tfindutils \t; \tmicrodnf clean all # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eux; \tkey='BCA4 3417 C3B4 85DD 128E C6D4 B7B3 B788 A8D3 785C'; \texport GNUPGHOME=\"$(mktemp -d)\"; \tgpg --batch --keyserver keyserver.ubuntu.com --recv-keys \"$key\"; \tgpg --batch --export --armor \"$key\" \u003e /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql; \trm -rf \"$GNUPGHOME\" # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "ENV MYSQL_MAJOR=innovation",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "ENV MYSQL_VERSION=9.0.1-1.el9",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eu; \t{ \t\techo '[mysqlinnovation-server-minimal]'; \t\techo 'name=MySQL innovation Server Minimal'; \t\techo 'enabled=1'; \t\techo 'baseurl=https://repo.mysql.com/yum/mysql-innovation-community/docker/el/9/$basearch/'; \t\techo 'gpgcheck=1'; \t\techo 'gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql'; \t\techo 'module_hotfixes=true'; \t} | tee /etc/yum.repos.d/mysql-community-minimal.repo # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eux; \tmicrodnf install -y \"mysql-community-server-minimal-$MYSQL_VERSION\"; \tmicrodnf clean all; \tgrep -F 'socket=/var/lib/mysql/mysql.sock' /etc/my.cnf; \tsed -i 's!^socket=.*!socket=/var/run/mysqld/mysqld.sock!' /etc/my.cnf; \tgrep -F 'socket=/var/run/mysqld/mysqld.sock' /etc/my.cnf; \t{ echo '[client]'; echo 'socket=/var/run/mysqld/mysqld.sock'; } \u003e\u003e /etc/my.cnf; \t\t! grep -F '!includedir' /etc/my.cnf; \t{ echo; echo '!includedir /etc/mysql/conf.d/'; } \u003e\u003e /etc/my.cnf; \tmkdir -p /etc/mysql/conf.d; \tmkdir -p /var/lib/mysql /var/run/mysqld; \tchown mysql:mysql /var/lib/mysql /var/run/mysqld; \tchmod 1777 /var/lib/mysql /var/run/mysqld; \t\tmkdir /docker-entrypoint-initdb.d; \t\tmysqld --version; \tmysql --version # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eu; \t{ \t\techo '[mysql-tools-community]'; \t\techo 'name=MySQL Tools Community'; \t\techo 'baseurl=https://repo.mysql.com/yum/mysql-tools-innovation-community/el/9/$basearch/'; \t\techo 'enabled=1'; \t\techo 'gpgcheck=1'; \t\techo 'gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql'; \t\techo 'module_hotfixes=true'; \t} | tee /etc/yum.repos.d/mysql-community-tools.repo # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "ENV MYSQL_SHELL_VERSION=9.0.1-1.el9",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "RUN /bin/sh -c set -eux; \tmicrodnf install -y \"mysql-shell-$MYSQL_SHELL_VERSION\"; \tmicrodnf clean all; \t\tmysqlsh --version # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "VOLUME [/var/lib/mysql]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "COPY docker-entrypoint.sh /usr/local/bin/ # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "ENTRYPOINT [\"docker-entrypoint.sh\"]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "EXPOSE map[3306/tcp:{} 33060/tcp:{}]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2024-07-22T22:36:10Z",
+              "created_by": "CMD [\"mysqld\"]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            }
+          ],
+          "os": "linux",
+          "rootfs": {
+            "type": "layers",
+            "diff_ids": [
+              "sha256:2606c15a4838dfb909dab29f47c601a797f657f51a35005bd06d01da891d813c",
+              "sha256:3dea2aeae1c6d0298ad76ae1f0c38b9e4169bc3a7182d3b6207ff18b72ccdb89",
+              "sha256:71bc13a2962ed139d840b10a1429bb6655a471f470917933adc4e49105b2ea33",
+              "sha256:31d776291afdf48f3f1f287b7c1885632490262c1bdee1f76162b7419d41eaab",
+              "sha256:c2182014683d67b7fdeda662d4b099a67936f446bb66244d5514c9b47214bdb0",
+              "sha256:afbd47451a753700b11a0cd27b3bef97b5d601ecd6f9a2de80627a9f096b83fa",
+              "sha256:be2b3692128b7efb2dbc769dbe83ac82823b20fa292195bb49c030b827aacb66",
+              "sha256:a34bb1401e4caff2725d372089d220bb068dc0129ad305011da96af8f10c9f94",
+              "sha256:ad5af488d607ef402926c37236d8d93470a73f2a83e317b4410115186d0f793a",
+              "sha256:feceac7d17e74808c01badccebbe437dc6f4616bf5f0680a9543648e9ed9aac5"
+            ]
+          },
+          "config": {
+            "Cmd": [
+              "mysqld"
+            ],
+            "Entrypoint": [
+              "docker-entrypoint.sh"
+            ],
+            "Env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "GOSU_VERSION=1.17",
+              "MYSQL_MAJOR=innovation",
+              "MYSQL_VERSION=9.0.1-1.el9",
+              "MYSQL_SHELL_VERSION=9.0.1-1.el9"
+            ],
+            "Volumes": {
+              "/var/lib/mysql": {}
+            },
+            "ArgsEscaped": true
+          }
+        }
+      },
+      "Results": [
+        {
+          "Target": "test-img:test (oracle 9.4)",
+          "Class": "os-pkgs",
+          "Type": "oracle"
+        },
+        {
+          "Target": "Python",
+          "Class": "lang-pkgs",
+          "Type": "python-pkg"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "scanStartedOn": "2024-08-15T07:44:57.111976278Z",
+    "scanFinishedOn": "2024-08-15T07:44:57.111976278Z"
+  }
+}
