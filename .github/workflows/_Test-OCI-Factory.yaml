@@ -67,7 +67,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ${{ env.PYTEST_RESULT_PATH }}
-          name: "${{ env.PYTEST_RESULT_PATH }}.zip"
           if-no-files-found: error
 
 

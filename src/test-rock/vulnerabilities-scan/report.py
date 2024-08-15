@@ -71,7 +71,7 @@ def process_report(report, last_scan, output_file = None):
     # scan json cosign-vuln for vulnerabilities 
     vulnerabilities = list()
 
-    for result in report["predicate"]["scanner"]["result"]["Results"]: # .scanner.result.Results[]
+    for result in report["scanner"]["result"]["Results"]: # .scanner.result.Results[]
 
         for vln in result["Vulnerabilities"]:
             

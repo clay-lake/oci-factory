@@ -28,7 +28,7 @@ on:
         description: 'Suffix for the vulnerability report artefact'
         required: false
         type: string
-        default: '.vulnerability-report.json'
+        default: 'vulnerability-report.json'
   # workflow_dispatch:
   #   inputs:
   #     oci-archive-name:
