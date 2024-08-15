@@ -88,7 +88,7 @@ def test_set_build_config_outputs():
 
         env_path = Path(tmp) / "env"
 
-        generate_matrix.set_build_config_outputs("test", test_build_matrices, env_path)
+        generate_matrix.set_build_config_outputs("test", test_build_matrices, output_file=env_path)
 
         with open(env_path, 'r') as fh:
             gh_output = fh.read()

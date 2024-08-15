@@ -1,5 +1,8 @@
 name: Test Rock
 
+
+# TODO: 
+# - create a workflow_caller for testing our GHCR rocks
 on:
   workflow_call:
     inputs:
