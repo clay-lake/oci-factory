@@ -14,9 +14,9 @@ def set_report_name(archive_name: str, report_suffix:str = "json") -> dict:
 
 
 def set_trivyignore(archive_path: str):
-    """Set the trivyignore-path output. Touch the trivyignore-path if non existant."""
+    """Set the trivyignore-path output. Touch the trivyignore-path if non existent."""
 
-    trivyignore_path = (Path(archive_path).parent / ".trivyignore").resolve()
+    trivyignore_path = Path(archive_path).parent / ".trivyignore"
     
     # TODO: confirm that this is a required behaviors, then add a test for it
     if not trivyignore_path.exists():
