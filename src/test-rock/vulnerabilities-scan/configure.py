@@ -74,7 +74,7 @@ if __name__ == "__main__":
         )
     
     outputs.update(
-        set_trivyignore(args.archive_dir)
+        set_trivyignore(args.archive_path)
         )
     
     set_github_output(outputs)
