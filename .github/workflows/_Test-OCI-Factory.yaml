@@ -21,8 +21,13 @@ env:
   OCI_FACTORY_DIR: oci-factory/
   OCI_FACTORY_BRANCH: refactor-workflows
   PYTEST_RESULT_PATH: pytest_results.xml
-  TEST_IMAGE_NAME: hello-world
-  TEST_IMAGE_TAG: latest
+
+
+  # TEST_IMAGE_NAME: hello-world
+  # TEST_IMAGE_TAG: latest
+
+  TEST_IMAGE_NAME: python
+  TEST_IMAGE_TAG: 2.7.9
 
 jobs:
 
