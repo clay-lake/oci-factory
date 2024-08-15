@@ -22,12 +22,13 @@ env:
   OCI_FACTORY_BRANCH: refactor-workflows
   PYTEST_RESULT_PATH: pytest_results.xml
 
-
+  # Example working image
   # TEST_IMAGE_NAME: hello-world
   # TEST_IMAGE_TAG: latest
 
+  # Example vulnerable image
   TEST_IMAGE_NAME: mysql
-  TEST_IMAGE_TAG: 2.7.9
+  TEST_IMAGE_TAG: latest
 
 jobs:
 
