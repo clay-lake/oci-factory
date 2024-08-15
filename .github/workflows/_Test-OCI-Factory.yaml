@@ -26,7 +26,7 @@ env:
   # TEST_IMAGE_NAME: hello-world
   # TEST_IMAGE_TAG: latest
 
-  TEST_IMAGE_NAME: python
+  TEST_IMAGE_NAME: mysql
   TEST_IMAGE_TAG: 2.7.9
 
 jobs:
