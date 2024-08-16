@@ -188,7 +188,7 @@ jobs:
           sudo umoci unpack --keep-dirlinks \
             --image ${{ env.TEST_IMAGE_NAME}}:${{ env.TEST_IMAGE_TAG }} \
             $PWD/bundle
-            ls -lash
+            find $PWD -maxdepth 2
 
           ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/malware_scan.py \
             --filesystem $PWD/bundle/rootfs
