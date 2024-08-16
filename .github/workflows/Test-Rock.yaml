@@ -6,18 +6,33 @@ name: Test Rock
 on:
   workflow_call:
     inputs:
+      test-oci-compliance:
+        description: 'Enable compliance test.'
+        default: true
+        type: boolean
+      test-efficiency:
+        description: 'Enable efficiency test.'
+        default: true
+        type: boolean
+      test-vulnerabilities:
+        description: 'Enable vulnerability test.'
+        default: true
+        type: boolean
+      test-malware:
+        description: 'Enable malware test.'
+        default: true
+        type: boolean
+
       oci-archive-name:
         description: 'OCI image artifact name.'
         required: true
         type: string
       vulnerability-report-suffix:
         description: 'Suffix for the vulnerability report artefact.'
-        required: false
         type: string
         default: 'vulnerability-report.json'
       date-last-scan:
         description: 'Report if there are new CVEs after this date.'
-        required: false
         type: string
         default: '9999-12-31T23:59:59'
 
@@ -247,13 +262,21 @@ jobs:
       - name: Scan Image
         id: test
         run: |
-
           umoci unpack --rootless --keep-dirlinks \
             --image ${{ env.TEST_IMAGE_NAME}} bundle
-
 
           ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/malware_scan.py \
             --filesystem bundle/rootfs
 
 
-          
+  result:
+    name: Collect Test Results
+    needs: [test-oci-compliance, test-efficiency, test-vulnerabilities, test-malware]
+    runs-on: ubuntu-22.04
+    if: ${{ always() }}
+    outputs: 
+      results: ${{ steps.results.outputs.key }}
+    steps:
+      - id: result
+        run: | 
+          echo ${{ needs.*.result }} >> $GITHUB_STEP_SUMMARY
