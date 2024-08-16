@@ -35,7 +35,7 @@ env:
   OCI_FACTORY_DIR: oci-factory/
   OCI_FACTORY_BRANCH: refactor-workflows
   # ROCK_REPO_DIR: rock-repo # path where the image repo is cloned to
-  # ROCK_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
+  # ROCK_CI_FOLDER: ci-rocks # path of uploaded/downloaded artifacts
   TEST_IMAGE_NAME: 'test-img'
   TEST_IMAGE_TAG: 'test'
   SKOPEO_IMAGE: 'quay.io/skopeo/stable:v1.15.1'
@@ -157,7 +157,7 @@ jobs:
         run: |
           docker run -e CI=true --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
-            -v $PWD/${{ env.OCI_FACTORY_DIR }}/src/test-rock/.dive-ci.yaml:/.dive-ci.yaml \
+            -v $PWD/${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-efficiency/.dive-ci.yaml:/.dive-ci.yaml \
             ${{ env.DIVE_IMAGE }} \
             ${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }} --ci-config /.dive-ci.yaml
 
@@ -191,7 +191,7 @@ jobs:
         with:
           python-version: "3.10"
 
-      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/tests/requirements.txt
+      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/requirements.txt
       
 
       - uses: actions/cache/restore@v4
