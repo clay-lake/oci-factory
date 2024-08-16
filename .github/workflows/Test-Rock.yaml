@@ -186,7 +186,7 @@ jobs:
         with:
           python-version: "3.10"
 
-      - run: pip install -r src/tests/requirements.txt
+      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/tests/requirements.txt
       
 
       - uses: actions/cache/restore@v4
