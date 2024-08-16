@@ -112,7 +112,7 @@ jobs:
   test-efficiency:
     runs-on: ubuntu-22.04
     name: Efficiency test
-    needs: [setup]
+    # needs: [setup]
     # TODO: remove once https://chat.charmhub.io/charmhub/pl/o5wxpb65ffbfzy7bcmi8kzftzy is fixed
     continue-on-error: true
     steps:
@@ -126,22 +126,28 @@ jobs:
           fetch-depth: 1
 
 
-      - uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.TEST_IMAGE_NAME}}
-          key: ${{ needs.setup.outputs.test-cache-key }}
+      # - uses: actions/cache/restore@v4
+      #   with:
+      #     path: ${{ env.TEST_IMAGE_NAME}}
+      #     key: ${{ needs.setup.outputs.test-cache-key }}
 
       # - name: Copy image to Docker daemon
       #   run: |
       #     sudo apt update && sudo apt install skopeo
       #       skopeo copy oci:${{ env.TEST_IMAGE_NAME}}:${{ env.TEST_IMAGE_TAG }} docker-daemon:${{ env.TEST_IMAGE_NAME}}:${{ env.TEST_IMAGE_TAG }}
 
+
+      - name: Download Test Image
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.oci-archive-name }}
+
       - name: Copy image to Docker daemon
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
             -v $PWD:/workdir -w /workdir \
             ${{ env.SKOPEO_IMAGE }} \
-            copy oci:${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }} \
+            copy oci-archive:${{ inputs.oci-archive-name }} \
             docker-daemon:${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
 
       # The existing Dive GH actions are outdated:
@@ -158,7 +164,6 @@ jobs:
 
   test-vulnerabilities:
     name: Vulnerability scan
-    needs: [setup]
     uses: ./.github/workflows/Vulnerability-Scan.yaml
     with:
       oci-archive-name: "${{ inputs.oci-archive-name }}"
