@@ -3,6 +3,7 @@ name: Test Rock
 
 # TODO: 
 # - create a workflow_caller for testing our GHCR rocks
+
 on:
   workflow_call:
     inputs:
@@ -279,5 +280,6 @@ jobs:
     steps:
       - id: result
         run: | 
-          echo ${{ toJSON(needs.*.result) }} >> $GITHUB_STEP_SUMMARY
-          echo ${{ toJSON(needs.*.outputs.status) }} >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs) }}'' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs.*.result) }}'' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs.*.outputs.result) }}' >> $GITHUB_STEP_SUMMARY
