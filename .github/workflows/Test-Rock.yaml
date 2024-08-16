@@ -279,4 +279,5 @@ jobs:
     steps:
       - id: result
         run: | 
-          echo ${{ needs.*.result }} >> $GITHUB_STEP_SUMMARY
+          echo ${{ toJSON(needs.*.result) }} >> $GITHUB_STEP_SUMMARY
+          echo ${{ toJSON(needs.*.outputs.status) }} >> $GITHUB_STEP_SUMMARY
