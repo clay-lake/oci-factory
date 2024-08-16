@@ -280,6 +280,6 @@ jobs:
     steps:
       - id: result
         run: | 
-          echo '${{ toJSON(needs) }}'' >> $GITHUB_STEP_SUMMARY
-          echo '${{ toJSON(needs.*.result) }}'' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs) }}' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs.*.result) }}' >> $GITHUB_STEP_SUMMARY
           echo '${{ toJSON(needs.*.outputs.result) }}' >> $GITHUB_STEP_SUMMARY
