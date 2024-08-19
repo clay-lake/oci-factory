@@ -31,10 +31,11 @@ def print_testsuite_pie_chart(testsuite, output = None):
 
     chart_data["pass"] = int(testsuite.attrib.get("tests",0)) - chart_data["failed"] - chart_data["error"] - chart_data["skipped"]
 
-    # remove empty wedges to avoid clutter
-    empty_wedges = [key for key, value in chart_data.items() if value == 0]
-    for key in empty_wedges:
-        del chart_data[key]
+    # TODO: colors order needs to be removed if we remove wedges
+    # # remove empty wedges to avoid clutter
+    # empty_wedges = [key for key, value in chart_data.items() if value == 0]
+    # for key in empty_wedges:
+    #     del chart_data[key]
 
 
     print("```mermaid", file=output)
