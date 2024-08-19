@@ -1,6 +1,6 @@
 #! /bin/env python3
 import xml.etree.ElementTree as ET
-
+import json
 
 """
 Generate markdown from a JUnit XML report for $GITHUB_STEP_SUMMARY 
@@ -23,28 +23,39 @@ def print_element(element, output = None):
 def print_testsuite_pie_chart(testsuite, output = None):
     """Generate a pie chart showing test status from testsuite element"""
 
-    chart_data = {
-        "failed": int(testsuite.attrib.get("failures", 0)),
-        "error": int(testsuite.attrib.get("errors", 0)),
-        "skipped": int(testsuite.attrib.get("skipped", 0)),
-    }
+    failed_tests = int(testsuite.attrib.get("failures", 0)) 
+    error_tests = int(testsuite.attrib.get("error", 0)) 
+    skipped_tests = int(testsuite.attrib.get("skipped", 0)) 
+    total_tests = int(testsuite.attrib.get("tests",0))
+    pass_tests = total_tests - failed_tests - error_tests - skipped_tests
 
-    chart_data["pass"] = int(testsuite.attrib.get("tests",0)) - chart_data["failed"] - chart_data["error"] - chart_data["skipped"]
+    #   name,       value,          colour
+    chart_data = [
+        ("failed",  failed_tests,   "#f00"),
+        ("error",   error_tests,    "#fa0"),
+        ("skipped", skipped_tests,  "#ff0"),
+        ("pass",    pass_tests,     "#0f0")
+    ] 
 
-    # TODO: colors order needs to be removed if we remove wedges
-    # # remove empty wedges to avoid clutter
-    # empty_wedges = [key for key, value in chart_data.items() if value == 0]
-    # for key in empty_wedges:
-    #     del chart_data[key]
+    # filter out wedges with 0 width
+    chart_data = list(filter(lambda w: w[1] != 0, chart_data))
 
+    # sort by value so colors match up
+    chart_data = list(sorted(chart_data, lambda w: w[1]))
+
+    config_dict = {'init': 
+                   {'theme': 'base', 
+                    'themeVariables': {f'pie{n+1}': w[2] for n, w in enumerate(chart_data)}
+                    }
+                }
 
     print("```mermaid", file=output)
 
     # theme colors in order: pass, failed, error, skipped
-    print("%%{init: {'theme': 'base', 'themeVariables': { 'pie1': '#0f0', 'pie2': '#f00', 'pie3': '#fa0', 'pie4': '#ff0'}}}%%", file=output)
+    print(f"%%{json.dumps(config_dict)}%%", file=output)
 
     print(f"pie title {testsuite.attrib['name']} Results", file=output)
-    for key, value in chart_data.items():
+    for key, value, _ in chart_data:
         print(f'"{key}" : {value}', file=output)
 
     print("```", file=output)
