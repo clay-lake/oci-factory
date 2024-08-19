@@ -7,7 +7,7 @@ on:
   workflow_call:
     inputs:
       oci-archive-name:
-        description: "Final filename of the rock's OCI archive."
+        description: "Final filename of the Rock OCI archive."
         type: string
         required: true
       rock-repo:
@@ -19,7 +19,7 @@ on:
         type: string
         required: true
       rockfile-directory:
-        description: "Directory, in 'rock-repo', where to find the rockcraft.yaml file."
+        description: "Directory in repository where to find the rockcraft.yaml file."
         type: string
         required: true
       arch-map:
@@ -33,7 +33,8 @@ on:
 
 env:
   ROCK_REPO_DIR: rock-repo # path where the image repo is cloned to
-  ROCK_CI_FOLDER: ci-rocks # path of uploaded/downloadded artifacts
+  ROCK_CI_FOLDER: ci-rocks # path of uploaded/downloaded artifacts
+  
   OCI_FACTORY_REPO: clay-lake/oci-factory # TODO: replace with parent repo when merging back
   OCI_FACTORY_DIR: oci-factory/
   OCI_FACTORY_BRANCH: refactor-workflows
@@ -47,7 +48,6 @@ jobs:
     outputs:
       runner-build-matrix: ${{ steps.configure.outputs.runner-build-matrix }} 
       lpci-build-matrix: ${{ steps.configure.outputs.lpci-build-matrix }} 
-      # cache-key: ${{ steps.configure.outputs.cache-key }} 
     steps:
 
       # Job Setup
@@ -78,10 +78,6 @@ jobs:
             --rockfile-directory "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}" \
             --lpci-fallback "${{ toJSON(inputs.lpci-fallback) }}" \
             --config ${{ toJSON(inputs.arch-map) }} # important: do not use quotes here
-
-            # TODO: set uuid in generate_matrix.py and rename to configure_job.py
-            # TODO: Disabled see note at bottom about cache
-            # echo "cache-key=${{github.run_id }}-${{ inputs.oci-archive-name }}"  >> $GITHUB_OUTPUT
 
 
   runner-build:
@@ -175,16 +171,14 @@ jobs:
           retry_wait_seconds: 30
           command: |
             ${{ env.OCI_FACTORY_DIR }}/src/build-rock/lpci_build/lpci_build.sh \
-            -c "${{ secrets.LP_CREDENTIALS_B64 }}" \
-            -d "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
+              -c "${{ secrets.LP_CREDENTIALS_B64 }}" \
+              -d "${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}"
 
       - name: Collect Artifacts
         id: collect-artifacts
         run: |
             mkdir -p ${{ env.ROCK_CI_FOLDER }} && cp ${{ env.ROCK_REPO_DIR }}/${{ inputs.rockfile-directory }}/*.rock "$_"
-
-          # TODO: determine why cache is not working  
-          # echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
+            echo "filename=${{ matrix.rock-name }}_${{ matrix.architecture }}" >> $GITHUB_OUTPUT
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -223,10 +217,9 @@ jobs:
 
       - name: Merge Single Arch Rocks
         run: |
-          ls -lash "${{ env.ROCK_CI_FOLDER }}"
           ${{ env.OCI_FACTORY_DIR }}/src/build-rock/assemble-rock/merge_rocks.sh \
-          -n "${{ inputs.oci-archive-name }}" \
-          -d "${{ env.ROCK_CI_FOLDER }}"
+            -n "${{ inputs.oci-archive-name }}" \
+            -d "${{ env.ROCK_CI_FOLDER }}"
 
 
       - name: Upload Multi Arch Rock
@@ -235,10 +228,3 @@ jobs:
           name: ${{ inputs.oci-archive-name }}
           path: ${{ inputs.oci-archive-name }}
           if-no-files-found: error
-
-      # TODO: determine why cache is not working          
-      # - name: Cache Multi Arch Rock
-      #   uses: actions/cache/save@v4
-      #   with:
-      #     path: ${{ inputs.oci-archive-name }}
-      #     key: ${{ needs.configure-build.outputs.cache-key}}
