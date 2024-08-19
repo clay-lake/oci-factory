@@ -41,7 +41,7 @@ def print_testsuite_pie_chart(testsuite, output = None):
     chart_data = list(filter(lambda w: w[1] != 0, chart_data))
 
     # sort by value so colors match up
-    chart_data = list(sorted(chart_data, lambda w: w[1]))
+    chart_data = list(sorted(chart_data, key = lambda w: w[1]))
 
     config_dict = {'init': 
                    {'theme': 'base', 
