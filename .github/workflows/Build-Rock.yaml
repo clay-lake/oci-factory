@@ -42,7 +42,7 @@ jobs:
 
   configure-build:
   # configure-build reads the rockcraft.yaml, creating one or more *-build job runs
-  # depending on the target archtecture.
+  # depending on the target architecture.
     runs-on: ubuntu-22.04
     outputs:
       runner-build-matrix: ${{ steps.configure.outputs.runner-build-matrix }} 
