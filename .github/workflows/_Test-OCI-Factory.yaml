@@ -33,10 +33,9 @@ env:
 jobs:
 
   pytest:
-    # Trigger unit tests across the repository
+    # Trigger python unit tests across the repository
     name: pytest
     runs-on: ubuntu-22.04
-    # TODO: Iterate over testable directories with matrix
     steps:
 
       # Job Setup
@@ -52,8 +51,12 @@ jobs:
           python-version: "3.x"
       # Unit Test requirements
       - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/pytest/requirements.txt
+
       # build-rock configure requirements 
       - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/build-rock/configure/requirements.txt
+
+      # test-rock/test-malware requirements 
+      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/requirements.txt
 
 
       - name: Run pytest
