@@ -62,7 +62,7 @@ jobs:
       - name: Run pytest
         continue-on-error: true
         run: |
-          python3 -m pytest -m "not slow" --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
+          python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
 
       - name: Generate Summary
         if: always()
