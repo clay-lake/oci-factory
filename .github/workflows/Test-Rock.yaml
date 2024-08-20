@@ -3,39 +3,47 @@ name: Test Rock
 
 # TODO: 
 # - create a workflow_caller for testing our GHCR rocks
+# - All test should follow the malware test as an example
 
 on:
   workflow_call:
     inputs:
-      test-oci-compliance:
-        description: 'Enable compliance test.'
-        default: true
-        type: boolean
-      test-efficiency:
-        description: 'Enable efficiency test.'
-        default: true
-        type: boolean
-      test-vulnerabilities:
-        description: 'Enable vulnerability test.'
-        default: true
-        type: boolean
-      test-malware:
-        description: 'Enable malware test.'
-        default: true
-        type: boolean
 
+      # Workflow Configuration
       oci-archive-name:
         description: 'OCI image artifact name.'
         required: true
         type: string
-      vulnerability-report-suffix:
-        description: 'Suffix for the vulnerability report artefact.'
-        type: string
-        default: 'vulnerability-report.json'
+
+      # Individual Test Configuration
+      
+      ## ICU Compliance Test
+      test-oci-compliance:
+        description: 'Enable compliance test.'
+        default: true
+        type: boolean
+
+      ## Image Efficiency Test
+      test-efficiency:
+        description: 'Enable image efficiency test.'
+        default: true
+        type: boolean
+
+      ## Vulnerability Test
+      test-vulnerabilities:
+        description: 'Enable vulnerability test.'
+        default: true
+        type: boolean
       date-last-scan:
         description: 'Report if there are new CVEs after this date.'
         type: string
         default: '9999-12-31T23:59:59'
+
+      ## Malware Test
+      test-malware:
+        description: 'Enable malware test.'
+        default: true
+        type: boolean
 
 env:
   OCI_FACTORY_REPO: clay-lake/oci-factory # TODO: replace with parent repo when merging back
@@ -46,7 +54,7 @@ env:
   TEST_IMAGE_TAG: 'test'
 
   SKOPEO_IMAGE: 'quay.io/skopeo/stable:v1.15.1'
-  DIVE_IMAGE: 'wagoodman/dive:v0.12'
+  
 
 jobs:
   unpack-rock:
@@ -56,7 +64,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Unpack Rock
     outputs:
-      test-cache-key: ${{ steps.set-cache.outputs.key }}
+      cache-key: ${{ steps.set-cache.outputs.key }}
     steps:
 
       # Job Setup
@@ -110,7 +118,7 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           path: ${{ env.TEST_IMAGE_NAME}}
-          key: ${{ needs.unpack-rock.outputs.test-cache-key }}
+          key: ${{ needs.unpack-rock.outputs.cache-key }}
 
       - name: Test Rock Compliance
         id: test
@@ -123,6 +131,8 @@ jobs:
  
 
   test-efficiency:
+    # test-efficiency tests the storage efficiency of our rock. 
+    # See src/test-rock/test-efficiency/.dive-ci.yaml for testing thresholds.
     runs-on: ubuntu-22.04
     name: Test Efficiency
     # TODO: remove once https://chat.charmhub.io/charmhub/pl/o5wxpb65ffbfzy7bcmi8kzftzy is fixed
@@ -137,10 +147,20 @@ jobs:
           ref: ${{ env.OCI_FACTORY_BRANCH }}
           fetch-depth: 1
 
+
+
       - name: Download Test Image
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.oci-archive-name }}
+
+        
+      - name: Configure
+        id: configure
+        run: |
+          ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-efficiency/configure.sh \
+            -d ${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
+
 
       - name: Copy image to Docker daemon
         run: |
@@ -149,17 +169,15 @@ jobs:
             ${{ env.SKOPEO_IMAGE }} \
             copy oci-archive:${{ inputs.oci-archive-name }} \
             docker-daemon:${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
-
+              
       # The existing Dive GH actions are outdated:
       # https://github.com/MartinHeinz/dive-action/issues/1
       # https://github.com/yuichielectric/dive-action/issues/581
       - name: Dive efficiency test
         run: |
-          docker run -e CI=true --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v $PWD/${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-efficiency/.dive-ci.yaml:/.dive-ci.yaml \
-            ${{ env.DIVE_IMAGE }} \
-            ${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }} --ci-config /.dive-ci.yaml
+          ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-efficiency/dive_test.sh \
+            -d ${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }} \
+            -c "$PWD/${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-efficiency/dive-ci.yaml" \
 
 
   test-vulnerabilities:
@@ -192,9 +210,7 @@ jobs:
           python3 ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-vulnerabilities/configure.py \
            --archive-name ${{ inputs.oci-archive-name }} \
            --archive-path ${{ inputs.oci-archive-name }} \
-           --report-suffix ${{ inputs.vulnerability-report-suffix }}
-           ls -lash
-
+           --report-suffix 'vulnerability-report.json'
 
       - name: Copy Rock to Docker Daemon
         run: |
@@ -263,7 +279,7 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           path: ${{ env.TEST_IMAGE_NAME}}
-          key: ${{ needs.unpack-rock.outputs.test-cache-key }}
+          key: ${{ needs.unpack-rock.outputs.cache-key }}
 
 
       - name: Scan Image
@@ -272,8 +288,17 @@ jobs:
           umoci unpack --rootless --keep-dirlinks \
             --image ${{ env.TEST_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }} bundle
 
+            # TODO: configure make global report name
           ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/malware_scan.py \
             --filesystem bundle/rootfs
+            --scan-output ./${{ inputs.oci-archive-name }}.malware_test.txt
+
+
+      - name: Report
+        id: report
+        run: |
+          ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/report.py \
+            --scan-input ./${{ inputs.oci-archive-name }}.malware_test.txt
 
 
   result:
@@ -286,6 +311,6 @@ jobs:
     steps:
       - id: result
         run: | 
-          echo '${{ toJSON(needs) }}' >> $GITHUB_STEP_SUMMARY
-          echo '${{ toJSON(needs.*.result) }}' >> $GITHUB_STEP_SUMMARY
-          echo '${{ toJSON(needs.*.outputs.result) }}' >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs) }}' # >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs.*.result) }}' # >> $GITHUB_STEP_SUMMARY
+          echo '${{ toJSON(needs.*.outputs.result) }}' # >> $GITHUB_STEP_SUMMARY
