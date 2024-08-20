@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: "3.x"
       # Unit Test requirements
-      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/requirements.txt
+      - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/pytest/requirements.txt
       # build-rock configure requirements 
       - run: pip install -r ${{ env.OCI_FACTORY_DIR }}/src/build-rock/configure/requirements.txt
 
@@ -59,8 +59,13 @@ jobs:
       - name: Run pytest
         continue-on-error: true
         run: |
-          python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}" || true
-          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/unit-tests/junit_to_markdown.py \
+          # we suppress non-zero exit status here to ensure
+          python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
+
+      - name: Generate Summary
+        continue-on-error: true
+        run: |
+          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/pytest/format_markdown_report.py \ 
             --input-junit "${{ env.PYTEST_RESULT_PATH }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload pytest Result
@@ -69,6 +74,10 @@ jobs:
           name: ${{ env.PYTEST_RESULT_PATH }}
           path: ${{ env.PYTEST_RESULT_PATH }}
           if-no-files-found: error
+
+
+
+
 
 
 
