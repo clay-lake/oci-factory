@@ -32,9 +32,9 @@ env:
 
 jobs:
 
-  unit-tests:
+  pytest:
     # Trigger unit tests across the repository
-    name: Unit Tests
+    name: pytest
     runs-on: ubuntu-22.04
     # TODO: Iterate over testable directories with matrix
     steps:

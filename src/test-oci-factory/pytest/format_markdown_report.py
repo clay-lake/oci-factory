@@ -58,7 +58,8 @@ def print_testsuite_pie_chart(testsuite, output=None):
     print("```mermaid", file=output)
 
     # theme colors in order: pass, failed, error, skipped
-    print(f"%%{{'init':{json.dumps(theme_dict)}}}%%", file=output)
+    # Note: init cannot be in quotes
+    print(f"%%{{init:{json.dumps(theme_dict)}}}%%", file=output)
 
     print(f"pie", file=output)
     for key, value, _, _ in chart_data:
@@ -81,7 +82,8 @@ def get_testcase_status(testcase):
 
 
 def print_header(testsuite, output=None):
-    passed = not (testsuite.attrib.get("failures") or testsuite.attrib.get("errors"))
+    passed = testsuite.attrib.get("failures") == "0" \
+                or testsuite.attrib.get("errors") == "0"
     status = ":white_check_mark:" if passed else ":x:"
 
     print(f"# {status} {testsuite.attrib['name']}", file=output)
