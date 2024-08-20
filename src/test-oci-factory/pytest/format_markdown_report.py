@@ -26,7 +26,7 @@ def print_testsuite_pie_chart(testsuite, output=None):
     """Generate a pie chart showing test status from testsuite element"""
 
     failed_tests = int(testsuite.attrib.get("failures", 0))
-    error_tests = int(testsuite.attrib.get("error", 0))
+    error_tests = int(testsuite.attrib.get("errors", 0))
     skipped_tests = int(testsuite.attrib.get("skipped", 0))
     total_tests = int(testsuite.attrib.get("tests", 0))
 
