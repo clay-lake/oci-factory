@@ -59,21 +59,23 @@ jobs:
       - name: Run pytest
         continue-on-error: true
         run: |
-          # we suppress non-zero exit status here to ensure
           python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
 
       - name: Generate Summary
-        continue-on-error: true
+        if: always()
         run: |
           python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/pytest/format_markdown_report.py \ 
             --input-junit "${{ env.PYTEST_RESULT_PATH }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload pytest Result
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PYTEST_RESULT_PATH }}
           path: ${{ env.PYTEST_RESULT_PATH }}
           if-no-files-found: error
+
+
 
 
 
