@@ -29,33 +29,36 @@ def print_testsuite_pie_chart(testsuite, output = None):
     total_tests = int(testsuite.attrib.get("tests",0))
     pass_tests = total_tests - failed_tests - error_tests - skipped_tests
 
-    #   name,       value,          colour
+    #   name,       value,          colour,     default_order
     chart_data = [
-        ("failed",  failed_tests,   "#f00"),
-        ("error",   error_tests,    "#fa0"),
-        ("skipped", skipped_tests,  "#ff0"),
-        ("pass",    pass_tests,     "#0f0")
+        ("failed",  failed_tests,   "#f00",     1),
+        ("error",   error_tests,    "#fa0",     2),
+        ("skipped", skipped_tests,  "#ff0",     3),
+        ("pass",    pass_tests,     "#0f0",     4)
     ] 
+    # note: default_order ensure color match if two wedges have the exact same value
 
     # filter out wedges with 0 width
     chart_data = list(filter(lambda w: w[1] != 0, chart_data))
 
-    # sort by value so colors match up
-    chart_data = list(sorted(chart_data, key = lambda w: w[1]))
+    # sort by value, then default order so colors match what we expect
+    chart_data = list(
+        sorted(chart_data, 
+               key = lambda w: (w[1], w[3]),
+               reverse=True)
+        )
 
-    config_dict = {'init': 
-                   {'theme': 'base', 
+    theme_dict = {'theme': 'base', 
                     'themeVariables': {f'pie{n+1}': w[2] for n, w in enumerate(chart_data)}
                     }
-                }
 
     print("```mermaid", file=output)
 
     # theme colors in order: pass, failed, error, skipped
-    print(f"%%{json.dumps(config_dict)}%%", file=output)
+    print(f"%%{{'init':{json.dumps(theme_dict)}}}%%", file=output)
 
-    print(f"pie title {testsuite.attrib['name']} Results", file=output)
-    for key, value, _ in chart_data:
+    print(f"pie", file=output)
+    for key, value, _, _ in chart_data:
         print(f'"{key}" : {value}', file=output)
 
     print("```", file=output)
@@ -71,15 +74,27 @@ def get_testcase_status(testcase):
         return ":information_source:"
     else: # passed
         return ":white_check_mark:"
+    
+def print_header(testsuite, output = None):
+    passed = not (testsuite.attrib.get("failures") or testsuite.attrib.get("errors"))
+    status = ":white_check_mark:" if passed else ":x:"
+
+    print(f"# {status} {testsuite.attrib['name']}", file=output)
+
 
 
 def print_testsuite_report(testsuite, output = None):
     """Print complete testsuite element Report"""
 
+    print_header(testsuite, output)
+
     # use pie chart header as title
     print_testsuite_pie_chart(testsuite, output)
+
+    # print testsuite info
     print_element(testsuite, output)
 
+    # print each test case in collapsable section
     for testcase in testsuite.findall('testcase'):
 
         print("<details>", file=output)
@@ -90,9 +105,15 @@ def print_testsuite_report(testsuite, output = None):
 
         for child in testcase.iter():
             print(f"<i>{child.tag}</i>", file=output)
-            print_element(child)
+            print_element(child, output)
 
         print("</details>", file=output)
+
+
+def print_junit_report(root, output=None):
+
+    for testsuite in root.findall("testsuite"):
+        print_testsuite_report(testsuite, output)
 
 
 if __name__ == "__main__":
@@ -112,7 +133,6 @@ if __name__ == "__main__":
 
     tree = ET.parse(args.input_junit)
     root = tree.getroot()
+    print_junit_report(root, sys.stdout)
     
-    for testsuite in root.findall("testsuite"):
-        print_testsuite_report(testsuite, output=sys.stdout)
 
