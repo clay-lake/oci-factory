@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from io import StringIO
 
+import notamodule
+
 import format_markdown_report as report
 
 
@@ -43,6 +45,3 @@ def test_assert_false():
 
     assert False, "Hello World"
 
-
-def test_assert_error():
-    import notamodule
