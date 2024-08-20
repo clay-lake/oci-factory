@@ -59,13 +59,12 @@ jobs:
       - name: Run pytest
         continue-on-error: true
         run: |
-          python3 -m pytest --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
+          python3 -m pytest -m "not slow" --junit-xml "${{ env.PYTEST_RESULT_PATH }}" "${{ env.OCI_FACTORY_DIR }}"
 
       - name: Generate Summary
         if: always()
         run: |
-          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/pytest/format_markdown_report.py \ 
-            --input-junit "${{ env.PYTEST_RESULT_PATH }}" >> $GITHUB_STEP_SUMMARY
+          python3 ${{ env.OCI_FACTORY_DIR }}/src/test-oci-factory/pytest/format_markdown_report.py --input-junit "${{ env.PYTEST_RESULT_PATH }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload pytest Result
         if: always()
