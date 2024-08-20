@@ -37,3 +37,12 @@ def test_print_junit_report_redirection(sample_failure, str_buff, capsys):
     stdout_content = captured.out
 
     assert stdout_content == str_buff_content, "printing to multiple locations"
+
+
+def test_assert_false():
+
+    assert False, "Hello World"
+
+
+def test_assert_error():
+    import notamodule
