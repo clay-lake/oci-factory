@@ -83,7 +83,7 @@ def get_testcase_status(testcase):
 
 def print_header(testsuite, output=None):
     passed = testsuite.attrib.get("failures") == "0" \
-                or testsuite.attrib.get("errors") == "0"
+                and testsuite.attrib.get("errors") == "0"
     status = ":white_check_mark:" if passed else ":x:"
 
     print(f"# {status} {testsuite.attrib['name']}", file=output)
