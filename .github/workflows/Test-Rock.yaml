@@ -290,7 +290,7 @@ jobs:
 
             # TODO: configure make global report name
           ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/malware_scan.py \
-            --filesystem bundle/rootfs
+            --filesystem bundle/rootfs \
             --scan-output ./${{ inputs.oci-archive-name }}.malware_test.txt
 
 
@@ -298,7 +298,7 @@ jobs:
         id: report
         run: |
           ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/report.py \
-            --scan-input ./${{ inputs.oci-archive-name }}.malware_test.txt
+            --scan-input ./${{ inputs.oci-archive-name }}.malware_test.txt >> $GITHUB_STEP_SUMMARY
 
 
   result:
