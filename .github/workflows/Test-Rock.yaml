@@ -297,7 +297,7 @@ jobs:
       - name: Report
         id: report
         run: |
-          ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/report.py \
+          ${{ env.OCI_FACTORY_DIR }}/src/test-rock/test-malware/report_malware_scan.py \
             --scan-input ./${{ inputs.oci-archive-name }}.malware_test.txt >> $GITHUB_STEP_SUMMARY
 
 
