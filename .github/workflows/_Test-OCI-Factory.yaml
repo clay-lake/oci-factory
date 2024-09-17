@@ -41,7 +41,7 @@ jobs:
             /repos/clay-lake/oci-factory/actions/runners
 
 
-  test-oci-factory:
+  test-missing-runner:
     runs-on: [linux, ARM64]
     steps:
       - name: execute bash
