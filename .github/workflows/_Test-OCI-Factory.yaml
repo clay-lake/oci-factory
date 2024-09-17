@@ -26,7 +26,6 @@ jobs:
 
   test-oci-factory:
     runs-on: ubuntu-22.04
-    permissions:
     steps:
       - name: execute bash
         run: |
